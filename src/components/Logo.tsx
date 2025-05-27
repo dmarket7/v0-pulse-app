@@ -1,9 +1,9 @@
-import { View, Image, Text, StyleSheet } from "react-native"
+import { View, Image, Text, StyleSheet } from "react-native";
 
 interface LogoProps {
-  size?: "small" | "medium" | "large"
-  showText?: boolean
-  variant?: "light" | "dark"
+  size?: "small" | "medium" | "large" | "xlarge";
+  showText?: boolean;
+  variant?: "light" | "dark";
 }
 
 export function Logo({ size = "medium", showText = true, variant = "light" }: LogoProps) {
@@ -11,13 +11,15 @@ export function Logo({ size = "medium", showText = true, variant = "light" }: Lo
     small: 32,
     medium: 48,
     large: 80,
-  }
+    xlarge: 200,
+  };
 
   const textSize = {
     small: 16,
     medium: 20,
     large: 28,
-  }
+    xlarge: 40,
+  };
 
   return (
     <View style={styles.container}>
@@ -31,7 +33,7 @@ export function Logo({ size = "medium", showText = true, variant = "light" }: Lo
         </Text>
       )}
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -46,4 +48,4 @@ const styles = StyleSheet.create({
   text: {
     fontWeight: "bold",
   },
-})
+});
