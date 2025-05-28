@@ -373,6 +373,56 @@ export function WelcomeScreen({ navigation }: Props) {
                 <TouchableOpacity style={styles.coachLogin} onPress={() => handleLogin("coach")}>
                   <Text style={styles.coachLoginText}>Coach Login</Text>
                 </TouchableOpacity>
+
+                {/* Public Features Section */}
+                <View style={styles.publicFeaturesSection}>
+                  <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>Explore Public Features</Text>
+                    <View style={styles.dividerLine} />
+                  </View>
+
+                  <View style={styles.publicFeaturesGrid}>
+                    <TouchableOpacity
+                      style={styles.publicFeatureCard}
+                      onPress={() => navigation.navigate("HealthTips")}
+                    >
+                      <Ionicons name="heart" size={24} color={Colors.primary} />
+                      <View style={styles.publicFeatureContent}>
+                        <Text style={styles.publicFeatureTitle}>Health Tips</Text>
+                        <Text style={styles.publicFeatureDescription}>
+                          Expert advice for young athletes
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.publicFeatureCard}
+                      onPress={() => navigation.navigate("TrainingGuidelines")}
+                    >
+                      <Ionicons name="fitness" size={24} color={Colors.primary} />
+                      <View style={styles.publicFeatureContent}>
+                        <Text style={styles.publicFeatureTitle}>Training Guidelines</Text>
+                        <Text style={styles.publicFeatureDescription}>
+                          Age-appropriate training plans
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.publicFeatureCard}
+                      onPress={() => navigation.navigate("ReadinessCheck")}
+                    >
+                      <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
+                      <View style={styles.publicFeatureContent}>
+                        <Text style={styles.publicFeatureTitle}>Readiness Check</Text>
+                        <Text style={styles.publicFeatureDescription}>
+                          Assess your training readiness
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
@@ -683,5 +733,35 @@ const styles = StyleSheet.create({
   particle3: {
     top: '45%',
     left: '85%',
+  },
+  // Public Features styles
+  publicFeaturesSection: {
+    marginTop: 24,
+  },
+  publicFeaturesGrid: {
+    gap: 12,
+  },
+  publicFeatureCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 12,
+    gap: 16,
+  },
+  publicFeatureContent: {
+    flexDirection: 'column',
+  },
+  publicFeatureTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
+    marginBottom: 4,
+  },
+  publicFeatureDescription: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
   },
 });

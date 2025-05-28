@@ -1,25 +1,31 @@
-import { NavigationContainer } from "@react-navigation/native"
-import { createStackNavigator } from "@react-navigation/stack"
-import { StatusBar } from "expo-status-bar"
-import { WelcomeScreen } from "./src/screens/WelcomeScreen"
-import { FamilyDashboard } from "./src/screens/FamilyDashboard"
-import { DailyRecommendation } from "./src/screens/DailyRecommendation"
-import { CoachRoster } from "./src/screens/CoachRoster"
-import { HealthInput } from "./src/screens/HealthInput"
-import { CalendarScreen } from "./src/screens/CalendarScreen"
-import { Settings } from "./src/screens/Settings"
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { StatusBar } from "expo-status-bar";
+import { WelcomeScreen } from "./src/screens/WelcomeScreen";
+import { FamilyDashboard } from "./src/screens/FamilyDashboard";
+import { DailyRecommendation } from "./src/screens/DailyRecommendation";
+import { CoachRoster } from "./src/screens/CoachRoster";
+import { HealthInput } from "./src/screens/HealthInput";
+import { CalendarScreen } from "./src/screens/CalendarScreen";
+import { Settings } from "./src/screens/Settings";
+import { HealthTipsScreen } from "./src/screens/HealthTipsScreen";
+import { TrainingGuidelinesScreen } from "./src/screens/TrainingGuidelinesScreen";
+import { ReadinessCheckScreen } from "./src/screens/ReadinessCheckScreen";
 
 export type RootStackParamList = {
-  Welcome: undefined
-  FamilyDashboard: { userRole: "parent" | "coach" }
-  DailyRecommendation: { childId: string; childName: string }
-  CoachRoster: undefined
-  HealthInput: { childId: string }
-  Calendar: undefined
-  Settings: undefined
-}
+  Welcome: undefined;
+  FamilyDashboard: { userRole: "parent" | "coach"; };
+  DailyRecommendation: { childId: string; childName: string; };
+  CoachRoster: undefined;
+  HealthInput: { childId: string; };
+  Calendar: undefined;
+  Settings: undefined;
+  HealthTips: undefined;
+  TrainingGuidelines: undefined;
+  ReadinessCheck: undefined;
+};
 
-const Stack = createStackNavigator<RootStackParamList>()
+const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
@@ -38,7 +44,10 @@ export default function App() {
         <Stack.Screen name="HealthInput" component={HealthInput} />
         <Stack.Screen name="Calendar" component={CalendarScreen} />
         <Stack.Screen name="Settings" component={Settings} />
+        <Stack.Screen name="HealthTips" component={HealthTipsScreen} />
+        <Stack.Screen name="TrainingGuidelines" component={TrainingGuidelinesScreen} />
+        <Stack.Screen name="ReadinessCheck" component={ReadinessCheckScreen} />
       </Stack.Navigator>
     </NavigationContainer>
-  )
+  );
 }
