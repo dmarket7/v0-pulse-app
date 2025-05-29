@@ -1,13 +1,12 @@
 "use client";
 
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Switch, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "../../App";
 import { Colors } from "../constants/colors";
-import { useAuth } from "../contexts/AuthContext";
 
 type SettingsNavigationProp = StackNavigationProp<RootStackParamList, "Settings">;
 
@@ -21,33 +20,6 @@ export function Settings({ navigation }: Props) {
   const [dailyNotifications, setDailyNotifications] = React.useState(true);
   const [healthReminders, setHealthReminders] = React.useState(true);
   const [trainingAlerts, setTrainingAlerts] = React.useState(false);
-
-  const { signOut, user } = useAuth();
-
-  const handleSignOut = async () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await signOut();
-            } catch (error) {
-              console.error('Sign out error:', error);
-              Alert.alert("Error", "Failed to sign out. Please try again.");
-            }
-          },
-        },
-      ]
-    );
-  };
 
   return (
     <LinearGradient colors={[Colors.background, Colors.backgroundLight]} style={styles.container}>
@@ -190,21 +162,6 @@ export function Settings({ navigation }: Props) {
                     thumbColor={trainingAlerts ? "#FFFFFF" : "#FFFFFF"}
                   />
                 </View>
-              </View>
-            </View>
-
-            {/* Account Section */}
-            <View style={styles.section}>
-              <Text style={styles.sectionHeader}>ACCOUNT</Text>
-              <View style={styles.sectionCard}>
-                <TouchableOpacity style={styles.settingItem} onPress={handleSignOut}>
-                  <View style={styles.settingLeft}>
-                    <View style={[styles.iconContainer, { backgroundColor: Colors.danger }]}>
-                      <Ionicons name="log-out-outline" size={20} color="white" />
-                    </View>
-                    <Text style={[styles.settingTitle, { color: Colors.danger }]}>Sign Out</Text>
-                  </View>
-                </TouchableOpacity>
               </View>
             </View>
           </View>

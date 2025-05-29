@@ -1,0 +1,376 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { RootStackParamList } from '../../App';
+import { Colors } from '../constants/colors';
+import { useAuth } from '../contexts/AuthContext';
+import { NavigationMenu } from '../components/NavigationMenu';
+
+type DashboardRouteProp = RouteProp<RootStackParamList, 'Dashboard'>;
+type DashboardNavigationProp = StackNavigationProp<RootStackParamList, 'Dashboard'>;
+
+export function Dashboard() {
+  const navigation = useNavigation<DashboardNavigationProp>();
+  const route = useRoute<DashboardRouteProp>();
+  const { user } = useAuth();
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+
+  // Get user role from authenticated user data, fallback to route params, then default to 'parent'
+  const userRole = (user?.user_metadata?.role as 'parent' | 'coach') || route.params?.userRole || 'parent';
+
+  const navigateToScreen = (screenName: keyof RootStackParamList, params?: any) => {
+    navigation.navigate(screenName as any, params);
+  };
+
+  // Role-specific content and styling
+  const getDashboardTitle = () => {
+    return userRole === 'coach' ? 'Coach Dashboard' : 'Dashboard';
+  };
+
+  const getRoleSpecificNavigationItems = () => {
+    const commonItems = [
+      {
+        id: 'daily-recommendations',
+        title: 'Daily Recommendations',
+        description: userRole === 'coach'
+          ? 'View team health recommendations'
+          : 'View personalized daily health recommendations',
+        icon: 'heart',
+        color: Colors.primary,
+        onPress: () => navigateToScreen('DailyRecommendation', { childId: '1', childName: userRole === 'coach' ? 'Team' : 'Child' }),
+      },
+      {
+        id: 'health-input',
+        title: 'Health Input',
+        description: userRole === 'coach'
+          ? 'Log team health data and metrics'
+          : 'Log health data and metrics',
+        icon: 'fitness',
+        color: Colors.success,
+        onPress: () => navigateToScreen('HealthInput', { childId: '1' }),
+      },
+      {
+        id: 'calendar',
+        title: 'Calendar',
+        description: userRole === 'coach'
+          ? 'View training schedules and events'
+          : 'View appointments and schedules',
+        icon: 'calendar',
+        color: Colors.warning,
+        onPress: () => navigateToScreen('Calendar'),
+      },
+      {
+        id: 'settings',
+        title: 'Settings',
+        description: 'Manage app preferences',
+        icon: 'settings',
+        color: Colors.gray[600],
+        onPress: () => navigateToScreen('Settings'),
+      },
+    ];
+
+    // Add coach-specific item
+    if (userRole === 'coach') {
+      commonItems.splice(1, 0, {
+        id: 'coach-roster',
+        title: 'Team Roster',
+        description: 'Manage your team roster and player readiness',
+        icon: 'people',
+        color: Colors.secondary,
+        onPress: () => navigateToScreen('CoachRoster'),
+      });
+    }
+
+    return commonItems;
+  };
+
+  const navigationItems = getRoleSpecificNavigationItems();
+
+  return (
+    <LinearGradient colors={[Colors.background, Colors.backgroundLight]} style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header with hamburger menu */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setIsMenuVisible(true)}
+            >
+              <Ionicons name="menu" size={24} color={Colors.textPrimary} />
+            </TouchableOpacity>
+            <View>
+              <Text style={styles.title}>{getDashboardTitle()}</Text>
+              <View style={styles.roleContainer}>
+                <View style={[styles.roleBadge, { backgroundColor: userRole === 'coach' ? Colors.secondary : Colors.primary }]}>
+                  <Ionicons
+                    name={userRole === 'coach' ? 'people' : 'home'}
+                    size={16}
+                    color="white"
+                  />
+                  <Text style={styles.roleText}>{userRole}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <View style={styles.content}>
+            {/* Welcome Section */}
+            <View style={styles.welcomeSection}>
+              {user?.email && (
+                <Text style={styles.welcomeText}>Welcome back, {user?.user_metadata?.full_name || user?.email}</Text>
+              )}
+              <Text style={styles.welcomeSubtext}>
+                {userRole === 'coach'
+                  ? 'Monitor your team\'s performance and readiness'
+                  : 'Track your athlete\'s health and performance journey'
+                }
+              </Text>
+            </View>
+
+            {/* Quick Stats Placeholder */}
+            <View style={styles.statsSection}>
+              <Text style={styles.sectionTitle}>Quick Overview</Text>
+              <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                  <View style={[styles.statIcon, { backgroundColor: Colors.success }]}>
+                    <Ionicons name="checkmark-circle" size={24} color="white" />
+                  </View>
+                  <Text style={styles.statValue}>
+                    {userRole === 'coach' ? '12/15' : '7/7'}
+                  </Text>
+                  <Text style={styles.statLabel}>
+                    {userRole === 'coach' ? 'Ready Players' : 'Days Active'}
+                  </Text>
+                </View>
+
+                <View style={styles.statCard}>
+                  <View style={[styles.statIcon, { backgroundColor: Colors.primary }]}>
+                    <Ionicons name="heart" size={24} color="white" />
+                  </View>
+                  <Text style={styles.statValue}>
+                    {userRole === 'coach' ? '85%' : '92%'}
+                  </Text>
+                  <Text style={styles.statLabel}>
+                    {userRole === 'coach' ? 'Team Health' : 'Health Score'}
+                  </Text>
+                </View>
+
+                <View style={styles.statCard}>
+                  <View style={[styles.statIcon, { backgroundColor: Colors.warning }]}>
+                    <Ionicons name="calendar" size={24} color="white" />
+                  </View>
+                  <Text style={styles.statValue}>
+                    {userRole === 'coach' ? '3' : '2'}
+                  </Text>
+                  <Text style={styles.statLabel}>
+                    {userRole === 'coach' ? 'Upcoming Games' : 'Appointments'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Recent Activity Placeholder */}
+            <View style={styles.activitySection}>
+              <Text style={styles.sectionTitle}>Recent Activity</Text>
+              <View style={styles.activityList}>
+                <View style={styles.activityItem}>
+                  <View style={[styles.activityIcon, { backgroundColor: Colors.success }]}>
+                    <Ionicons name="fitness" size={16} color="white" />
+                  </View>
+                  <View style={styles.activityContent}>
+                    <Text style={styles.activityTitle}>
+                      {userRole === 'coach' ? 'Team training logged' : 'Health data logged'}
+                    </Text>
+                    <Text style={styles.activityTime}>2 hours ago</Text>
+                  </View>
+                </View>
+
+                <View style={styles.activityItem}>
+                  <View style={[styles.activityIcon, { backgroundColor: Colors.primary }]}>
+                    <Ionicons name="heart" size={16} color="white" />
+                  </View>
+                  <View style={styles.activityContent}>
+                    <Text style={styles.activityTitle}>
+                      {userRole === 'coach' ? 'Player readiness updated' : 'Daily recommendation viewed'}
+                    </Text>
+                    <Text style={styles.activityTime}>5 hours ago</Text>
+                  </View>
+                </View>
+
+                <View style={styles.activityItem}>
+                  <View style={[styles.activityIcon, { backgroundColor: Colors.warning }]}>
+                    <Ionicons name="calendar" size={16} color="white" />
+                  </View>
+                  <View style={styles.activityContent}>
+                    <Text style={styles.activityTitle}>
+                      {userRole === 'coach' ? 'Game scheduled' : 'Appointment scheduled'}
+                    </Text>
+                    <Text style={styles.activityTime}>1 day ago</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Navigation Menu */}
+        <NavigationMenu
+          isVisible={isMenuVisible}
+          onClose={() => setIsMenuVisible(false)}
+          navigationItems={navigationItems}
+          userRole={userRole}
+        />
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  menuButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  roleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'white',
+    textTransform: 'capitalize',
+  },
+  content: {
+    paddingHorizontal: 24,
+    gap: 32,
+    paddingBottom: 32,
+  },
+  welcomeSection: {
+    paddingTop: 16,
+  },
+  welcomeText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  welcomeSubtext: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  statsSection: {
+    gap: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    gap: 8,
+  },
+  statIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  activitySection: {
+    gap: 16,
+  },
+  activityList: {
+    gap: 12,
+  },
+  activityItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+  },
+  activityIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activityContent: {
+    flex: 1,
+    gap: 4,
+  },
+  activityTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  activityTime: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+});

@@ -3,7 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { StatusBar } from "expo-status-bar";
 import { WelcomeScreen } from "./src/screens/WelcomeScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
-import { FamilyDashboard } from "./src/screens/FamilyDashboard";
+import { Dashboard } from "./src/screens/Dashboard";
 import { DailyRecommendation } from "./src/screens/DailyRecommendation";
 import { CoachRoster } from "./src/screens/CoachRoster";
 import { HealthInput } from "./src/screens/HealthInput";
@@ -18,7 +18,7 @@ import { LoadingScreen } from "./src/components/LoadingScreen";
 export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
-  FamilyDashboard: { userRole?: "parent" | "coach"; };
+  Dashboard: { userRole?: "parent" | "coach"; };
   DailyRecommendation: { childId: string; childName: string; };
   CoachRoster: undefined;
   HealthInput: { childId: string; };
@@ -42,7 +42,7 @@ function AppNavigator() {
     <NavigationContainer>
       <StatusBar style="light" />
       <Stack.Navigator
-        initialRouteName={isAuthenticated ? "FamilyDashboard" : "Welcome"}
+        initialRouteName={isAuthenticated ? "Dashboard" : "Welcome"}
         screenOptions={{
           headerShown: false,
         }}
@@ -51,8 +51,8 @@ function AppNavigator() {
           // Authenticated screens
           <>
             <Stack.Screen
-              name="FamilyDashboard"
-              component={FamilyDashboard}
+              name="Dashboard"
+              component={Dashboard}
             />
             <Stack.Screen name="DailyRecommendation" component={DailyRecommendation} />
             <Stack.Screen name="CoachRoster" component={CoachRoster} />
