@@ -47,6 +47,14 @@ export interface SignInRequest {
   password: string;
 }
 
+export interface SignInResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  user: UserResponse;
+}
+
 export interface UserResponse {
   id: string;
   email?: string;
@@ -70,6 +78,12 @@ export interface HealthLogCreate {
 
 export interface HealthLogRead extends HealthLogCreate {
   id: string;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+  details?: any;
 }
 
 export type SportType = 'soccer' | 'basketball' | 'tennis' | 'swimming' | 'track' | 'other';
@@ -111,7 +125,13 @@ class ApiService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        const error: ApiError = {
+          message: errorData.message || `HTTP error! status: ${response.status}`,
+          status: response.status,
+          details: errorData,
+        };
+        throw error;
       }
 
       return await response.json();
@@ -171,7 +191,7 @@ class ApiService {
     });
   }
 
-  async signIn(data: SignInRequest): Promise<any> {
+  async signIn(data: SignInRequest): Promise<SignInResponse> {
     return this.request('/api/v1/auth/signin', {
       method: 'POST',
       body: JSON.stringify(data),

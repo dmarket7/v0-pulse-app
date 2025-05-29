@@ -130,11 +130,7 @@ export function WelcomeScreen({ navigation }: Props) {
   }, []);
 
   const handleLogin = (role: "parent" | "coach") => {
-    if (role === "parent") {
-      navigation.navigate("FamilyDashboard", { userRole: role });
-    } else {
-      navigation.navigate("CoachRoster");
-    }
+    navigation.navigate("Login");
   };
 
   // Interpolations for background animations
