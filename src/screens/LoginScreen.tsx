@@ -203,6 +203,19 @@ export function LoginScreen({ navigation }: Props) {
                 )}
               </TouchableOpacity>
 
+              {/* Divider */}
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>Or continue with</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              {/* Google Login Button */}
+              <TouchableOpacity style={styles.googleButton}>
+                <Ionicons name="logo-google" size={20} color={Colors.white} />
+                <Text style={styles.googleButtonText}>Continue with Google</Text>
+              </TouchableOpacity>
+
               <View style={styles.switchMode}>
                 <Text style={styles.switchModeText}>
                   {isSignUp ? 'Already have an account?' : "Don't have an account?"}
@@ -329,5 +342,37 @@ const styles = StyleSheet.create({
     color: Colors.accent,
     fontSize: 14,
     fontWeight: '600',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.textSecondary,
+  },
+  dividerText: {
+    color: Colors.textSecondary,
+    fontSize: 14,
+    marginHorizontal: 12,
+  },
+  googleButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: Colors.textSecondary,
+    borderRadius: 12,
+    height: 56,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  googleButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 8,
   },
 });

@@ -4,12 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Animated,
   Dimensions,
@@ -30,9 +27,6 @@ interface Props {
 }
 
 export function WelcomeScreen({ navigation }: Props) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
   // Animation values
@@ -106,7 +100,7 @@ export function WelcomeScreen({ navigation }: Props) {
       );
       floatAnimation.start();
 
-      // Transition to welcome screen after 5 seconds
+      // Transition to welcome screen after 3 seconds
       setTimeout(() => {
         // Fade out splash and fade in welcome screen simultaneously
         Animated.parallel([
@@ -129,7 +123,7 @@ export function WelcomeScreen({ navigation }: Props) {
     startAnimations();
   }, []);
 
-  const handleLogin = (role: "parent" | "coach") => {
+  const handleLogin = () => {
     navigation.navigate("Login");
   };
 
@@ -296,132 +290,79 @@ export function WelcomeScreen({ navigation }: Props) {
     <Animated.View style={[styles.container, { opacity: welcomeOpacity }]}>
       <LinearGradient colors={[Colors.background, Colors.backgroundLight, Colors.primary]} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
-          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboardView}>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-              {/* Logo */}
-              <View style={styles.logoContainer}>
-                <Logo size="large" showText={true} variant="light" />
-                <Text style={styles.logoSubtitle}>
-                  {isSignUp ? "Your Family's Athletic Wellness Hub" : "Youth Athlete Wellness, Simplified."}
-                </Text>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            {/* Logo */}
+            <View style={styles.logoContainer}>
+              <Logo size="large" showText={true} variant="light" />
+              <Text style={styles.logoSubtitle}>
+                Youth Athlete Wellness, Simplified.
+              </Text>
+            </View>
+
+            {/* Main Login Button */}
+            <View style={styles.loginSection}>
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={handleLogin}
+              >
+                <Ionicons name="log-in-outline" size={24} color={Colors.white} style={styles.loginIcon} />
+                <Text style={styles.loginButtonText}>Login</Text>
+              </TouchableOpacity>
+              <Text style={styles.loginSubtext}>
+                Sign in to track your athlete's health and performance
+              </Text>
+            </View>
+
+            {/* Public Features Section */}
+            <View style={styles.publicFeaturesSection}>
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>Explore Public Features</Text>
+                <View style={styles.dividerLine} />
               </View>
 
-              {/* Form */}
-              <View style={styles.formContainer}>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Email Address</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="you@example.com"
-                    placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                  />
-                </View>
-
-                <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Password</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="••••••••"
-                    placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                    secureTextEntry
-                  />
-                </View>
+              <View style={styles.publicFeaturesGrid}>
+                <TouchableOpacity
+                  style={styles.publicFeatureCard}
+                  onPress={() => navigation.navigate("HealthTips")}
+                >
+                  <Ionicons name="heart" size={24} color={Colors.primary} />
+                  <View style={styles.publicFeatureContent}>
+                    <Text style={styles.publicFeatureTitle}>Health Tips</Text>
+                    <Text style={styles.publicFeatureDescription}>
+                      Expert advice for young athletes
+                    </Text>
+                  </View>
+                </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.loginButton, { backgroundColor: Colors.primary }]}
-                  onPress={() => handleLogin("parent")}
+                  style={styles.publicFeatureCard}
+                  onPress={() => navigation.navigate("TrainingGuidelines")}
                 >
-                  <Text style={styles.loginButtonText}>{isSignUp ? "Sign Up" : "Log In"}</Text>
-                </TouchableOpacity>
-
-                {!isSignUp && (
-                  <TouchableOpacity style={styles.forgotPassword}>
-                    <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-                  </TouchableOpacity>
-                )}
-
-                <View style={styles.divider}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>Or continue with</Text>
-                  <View style={styles.dividerLine} />
-                </View>
-
-                <TouchableOpacity style={styles.googleButton}>
-                  <Ionicons name="logo-google" size={20} color="white" />
-                  <Text style={styles.googleButtonText}>Continue with Google</Text>
-                </TouchableOpacity>
-
-                <View style={styles.signUpContainer}>
-                  <Text style={styles.signUpText}>
-                    {isSignUp ? "Already have an account? " : "Don't have an account? "}
-                  </Text>
-                  <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
-                    <Text style={styles.signUpLink}>{isSignUp ? "Log In" : "Sign Up"}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity style={styles.coachLogin} onPress={() => handleLogin("coach")}>
-                  <Text style={styles.coachLoginText}>Coach Login</Text>
-                </TouchableOpacity>
-
-                {/* Public Features Section */}
-                <View style={styles.publicFeaturesSection}>
-                  <View style={styles.divider}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>Explore Public Features</Text>
-                    <View style={styles.dividerLine} />
+                  <Ionicons name="fitness" size={24} color={Colors.primary} />
+                  <View style={styles.publicFeatureContent}>
+                    <Text style={styles.publicFeatureTitle}>Training Guidelines</Text>
+                    <Text style={styles.publicFeatureDescription}>
+                      Age-appropriate training plans
+                    </Text>
                   </View>
+                </TouchableOpacity>
 
-                  <View style={styles.publicFeaturesGrid}>
-                    <TouchableOpacity
-                      style={styles.publicFeatureCard}
-                      onPress={() => navigation.navigate("HealthTips")}
-                    >
-                      <Ionicons name="heart" size={24} color={Colors.primary} />
-                      <View style={styles.publicFeatureContent}>
-                        <Text style={styles.publicFeatureTitle}>Health Tips</Text>
-                        <Text style={styles.publicFeatureDescription}>
-                          Expert advice for young athletes
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.publicFeatureCard}
-                      onPress={() => navigation.navigate("TrainingGuidelines")}
-                    >
-                      <Ionicons name="fitness" size={24} color={Colors.primary} />
-                      <View style={styles.publicFeatureContent}>
-                        <Text style={styles.publicFeatureTitle}>Training Guidelines</Text>
-                        <Text style={styles.publicFeatureDescription}>
-                          Age-appropriate training plans
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.publicFeatureCard}
-                      onPress={() => navigation.navigate("ReadinessCheck")}
-                    >
-                      <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
-                      <View style={styles.publicFeatureContent}>
-                        <Text style={styles.publicFeatureTitle}>Readiness Check</Text>
-                        <Text style={styles.publicFeatureDescription}>
-                          Assess your training readiness
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.publicFeatureCard}
+                  onPress={() => navigation.navigate("ReadinessCheck")}
+                >
+                  <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
+                  <View style={styles.publicFeatureContent}>
+                    <Text style={styles.publicFeatureTitle}>Readiness Check</Text>
+                    <Text style={styles.publicFeatureDescription}>
+                      Assess your training readiness
+                    </Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               </View>
-            </ScrollView>
-          </KeyboardAvoidingView>
+            </View>
+          </ScrollView>
         </SafeAreaView>
       </LinearGradient>
     </Animated.View>
@@ -518,14 +459,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Existing styles
+  // Main screen styles
   container: {
     flex: 1,
   },
   safeArea: {
-    flex: 1,
-  },
-  keyboardView: {
     flex: 1,
   },
   scrollContent: {
@@ -538,71 +476,54 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 48,
   },
-  logoIcon: {
-    width: 64,
-    height: 64,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-    position: "relative",
-  },
-  pulseIcon: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-  },
-  logoTitle: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 8,
-  },
   logoSubtitle: {
     fontSize: 18,
     color: "rgba(255, 255, 255, 0.8)",
     textAlign: "center",
+    marginTop: 16,
   },
-  formContainer: {
-    gap: 16,
-  },
-  inputContainer: {
-    gap: 4,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.9)",
-  },
-  input: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "white",
+
+  // Login section styles
+  loginSection: {
+    alignItems: 'center',
+    marginBottom: 48,
   },
   loginButton: {
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 8,
+    backgroundColor: Colors.accent,
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    minWidth: 200,
+    shadowColor: Colors.accent,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  loginIcon: {
+    marginRight: 12,
   },
   loginButtonText: {
-    color: "#3B82F6",
-    fontSize: 16,
+    color: Colors.white,
+    fontSize: 18,
     fontWeight: "600",
   },
-  forgotPassword: {
-    alignItems: "center",
-  },
-  forgotPasswordText: {
-    color: "rgba(255, 255, 255, 0.8)",
+  loginSubtext: {
     fontSize: 14,
+    color: "rgba(255, 255, 255, 0.7)",
+    textAlign: "center",
+    maxWidth: 280,
+    lineHeight: 20,
   },
+
+  // Divider styles
   divider: {
     flexDirection: "row",
     alignItems: "center",
@@ -616,48 +537,9 @@ const styles = StyleSheet.create({
   dividerText: {
     color: "rgba(255, 255, 255, 0.8)",
     fontSize: 14,
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
   },
-  googleButton: {
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    borderRadius: 12,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  googleButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  signUpContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 24,
-  },
-  signUpText: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: 14,
-  },
-  signUpLink: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  coachLogin: {
-    alignItems: "center",
-    marginTop: 16,
-  },
-  coachLoginText: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: 14,
-    textDecorationLine: "underline",
-  },
+
   // Orbiting elements styles
   orbitingElement: {
     position: 'absolute',
@@ -710,6 +592,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginLeft: -5,
   },
+
   // Particle styles
   particle: {
     position: 'absolute',
@@ -730,6 +613,7 @@ const styles = StyleSheet.create({
     top: '45%',
     left: '85%',
   },
+
   // Public Features styles
   publicFeaturesSection: {
     marginTop: 24,
