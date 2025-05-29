@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../../App';
 import { Colors } from '../constants/colors';
+import { useAuth } from '../contexts/AuthContext';
 
 type FamilyDashboardRouteProp = RouteProp<RootStackParamList, 'FamilyDashboard'>;
 type FamilyDashboardNavigationProp = StackNavigationProp<RootStackParamList, 'FamilyDashboard'>;
@@ -13,18 +14,85 @@ type FamilyDashboardNavigationProp = StackNavigationProp<RootStackParamList, 'Fa
 export function FamilyDashboard() {
   const navigation = useNavigation<FamilyDashboardNavigationProp>();
   const route = useRoute<FamilyDashboardRouteProp>();
-  const { userRole } = route.params;
+  const { user } = useAuth();
+
+  // Get user role from authenticated user data, fallback to route params, then default to 'parent'
+  const userRole = (user?.user_metadata?.role as 'parent' | 'coach') || route.params?.userRole || 'parent';
 
   const navigateToScreen = (screenName: keyof RootStackParamList, params?: any) => {
     navigation.navigate(screenName as any, params);
   };
+
+  // Role-specific content and styling
+  const getDashboardTitle = () => {
+    return userRole === 'coach' ? 'Coach Dashboard' : 'Family Dashboard';
+  };
+
+  const getRoleSpecificCards = () => {
+    const commonCards = [
+      {
+        id: 'daily-recommendations',
+        title: 'Daily Recommendations',
+        description: userRole === 'coach'
+          ? 'View team health recommendations'
+          : 'View personalized daily health recommendations',
+        icon: 'heart',
+        color: Colors.primary,
+        onPress: () => navigateToScreen('DailyRecommendation', { childId: '1', childName: userRole === 'coach' ? 'Team' : 'Child' }),
+      },
+      {
+        id: 'health-input',
+        title: 'Health Input',
+        description: userRole === 'coach'
+          ? 'Log team health data and metrics'
+          : 'Log health data and metrics',
+        icon: 'fitness',
+        color: Colors.success,
+        onPress: () => navigateToScreen('HealthInput', { childId: '1' }),
+      },
+      {
+        id: 'calendar',
+        title: 'Calendar',
+        description: userRole === 'coach'
+          ? 'View training schedules and events'
+          : 'View appointments and schedules',
+        icon: 'calendar',
+        color: Colors.warning,
+        onPress: () => navigateToScreen('Calendar'),
+      },
+      {
+        id: 'settings',
+        title: 'Settings',
+        description: 'Manage app preferences',
+        icon: 'settings',
+        color: Colors.gray[600],
+        onPress: () => navigateToScreen('Settings'),
+      },
+    ];
+
+    // Add coach-specific card
+    if (userRole === 'coach') {
+      commonCards.splice(1, 0, {
+        id: 'coach-roster',
+        title: 'Team Roster',
+        description: 'Manage your team roster and player readiness',
+        icon: 'people',
+        color: Colors.secondary,
+        onPress: () => navigateToScreen('CoachRoster'),
+      });
+    }
+
+    return commonCards;
+  };
+
+  const cards = getRoleSpecificCards();
 
   return (
     <LinearGradient colors={[Colors.background, Colors.backgroundLight]} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
-            <Text style={styles.title}>Family Dashboard</Text>
+            <Text style={styles.title}>{getDashboardTitle()}</Text>
             <View style={styles.roleContainer}>
               <View style={[styles.roleBadge, { backgroundColor: userRole === 'coach' ? Colors.secondary : Colors.primary }]}>
                 <Ionicons
@@ -35,100 +103,32 @@ export function FamilyDashboard() {
                 <Text style={styles.roleText}>{userRole}</Text>
               </View>
             </View>
+            {user?.email && (
+              <Text style={styles.userEmail}>Welcome back, {user.email}</Text>
+            )}
           </View>
 
           <View style={styles.content}>
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => navigateToScreen('DailyRecommendation', { childId: '1', childName: 'Child' })}
-            >
-              <View style={styles.cardContent}>
-                <View style={styles.cardHeader}>
-                  <View style={[styles.cardIcon, { backgroundColor: Colors.primary }]}>
-                    <Ionicons name="heart" size={20} color="white" />
-                  </View>
-                  <View style={styles.cardTextContainer}>
-                    <Text style={styles.cardTitle}>Daily Recommendations</Text>
-                    <Text style={styles.cardDescription}>View personalized daily health recommendations</Text>
-                  </View>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.6)" />
-            </TouchableOpacity>
-
-            {userRole === 'coach' && (
+            {cards.map((card) => (
               <TouchableOpacity
+                key={card.id}
                 style={styles.card}
-                onPress={() => navigateToScreen('CoachRoster')}
+                onPress={card.onPress}
               >
                 <View style={styles.cardContent}>
                   <View style={styles.cardHeader}>
-                    <View style={[styles.cardIcon, { backgroundColor: Colors.secondary }]}>
-                      <Ionicons name="people" size={20} color="white" />
+                    <View style={[styles.cardIcon, { backgroundColor: card.color }]}>
+                      <Ionicons name={card.icon as any} size={20} color="white" />
                     </View>
                     <View style={styles.cardTextContainer}>
-                      <Text style={styles.cardTitle}>Coach Roster</Text>
-                      <Text style={styles.cardDescription}>Manage your coaching roster</Text>
+                      <Text style={styles.cardTitle}>{card.title}</Text>
+                      <Text style={styles.cardDescription}>{card.description}</Text>
                     </View>
                   </View>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.6)" />
               </TouchableOpacity>
-            )}
-
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => navigateToScreen('HealthInput', { childId: '1' })}
-            >
-              <View style={styles.cardContent}>
-                <View style={styles.cardHeader}>
-                  <View style={[styles.cardIcon, { backgroundColor: Colors.success }]}>
-                    <Ionicons name="fitness" size={20} color="white" />
-                  </View>
-                  <View style={styles.cardTextContainer}>
-                    <Text style={styles.cardTitle}>Health Input</Text>
-                    <Text style={styles.cardDescription}>Log health data and metrics</Text>
-                  </View>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.6)" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => navigateToScreen('Calendar')}
-            >
-              <View style={styles.cardContent}>
-                <View style={styles.cardHeader}>
-                  <View style={[styles.cardIcon, { backgroundColor: Colors.warning }]}>
-                    <Ionicons name="calendar" size={20} color="white" />
-                  </View>
-                  <View style={styles.cardTextContainer}>
-                    <Text style={styles.cardTitle}>Calendar</Text>
-                    <Text style={styles.cardDescription}>View appointments and schedules</Text>
-                  </View>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.6)" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => navigateToScreen('Settings')}
-            >
-              <View style={styles.cardContent}>
-                <View style={styles.cardHeader}>
-                  <View style={[styles.cardIcon, { backgroundColor: Colors.gray[600] }]}>
-                    <Ionicons name="settings" size={20} color="white" />
-                  </View>
-                  <View style={styles.cardTextContainer}>
-                    <Text style={styles.cardTitle}>Settings</Text>
-                    <Text style={styles.cardDescription}>Manage app preferences</Text>
-                  </View>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.6)" />
-            </TouchableOpacity>
+            ))}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -217,5 +217,10 @@ const styles = StyleSheet.create({
   cardDescription: {
     fontSize: 14,
     color: Colors.textSecondary,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginTop: 16,
   },
 });

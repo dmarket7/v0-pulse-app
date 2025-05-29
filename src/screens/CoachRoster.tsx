@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, FlatList } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
-import type { StackNavigationProp } from "@react-navigation/stack"
-import type { RootStackParamList } from "../../App"
-import { Colors } from "../constants/colors"
+import { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, FlatList } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import type { StackNavigationProp } from "@react-navigation/stack";
+import type { RootStackParamList } from "../../App";
+import { Colors } from "../constants/colors";
 
-type CoachRosterNavigationProp = StackNavigationProp<RootStackParamList, "CoachRoster">
+type CoachRosterNavigationProp = StackNavigationProp<RootStackParamList, "CoachRoster">;
 
 interface Props {
-  navigation: CoachRosterNavigationProp
+  navigation: CoachRosterNavigationProp;
 }
 
 interface Player {
-  id: string
-  name: string
-  position: string
-  status: "optimal" | "caution" | "rest"
-  avatar: string
+  id: string;
+  name: string;
+  position: string;
+  status: "optimal" | "caution" | "rest";
+  avatar: string;
 }
 
 const players: Player[] = [
@@ -28,45 +28,45 @@ const players: Player[] = [
   { id: "4", name: "Emma Davis", position: "Goalkeeper", status: "optimal", avatar: "🥅" },
   { id: "5", name: "Tyler Brown", position: "Forward", status: "optimal", avatar: "⚽" },
   { id: "6", name: "Zoe Martinez", position: "Midfielder", status: "caution", avatar: "🏃‍♀️" },
-]
+];
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case "optimal":
-      return Colors.success
+      return Colors.success;
     case "caution":
-      return Colors.warning
+      return Colors.warning;
     case "rest":
-      return Colors.danger
+      return Colors.danger;
     default:
-      return "#6B7280"
+      return "#6B7280";
   }
-}
+};
 
 const getStatusText = (status: string) => {
   switch (status) {
     case "optimal":
-      return "Optimal"
+      return "Optimal";
     case "caution":
-      return "Caution"
+      return "Caution";
     case "rest":
-      return "Rest"
+      return "Rest";
     default:
-      return "Unknown"
+      return "Unknown";
   }
-}
+};
 
 export function CoachRoster({ navigation }: Props) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedFilter, setSelectedFilter] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("all");
 
   const filteredPlayers = players.filter((player) => {
-    const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = selectedFilter === "all" || player.status === selectedFilter
-    return matchesSearch && matchesFilter
-  })
+    const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = selectedFilter === "all" || player.status === selectedFilter;
+    return matchesSearch && matchesFilter;
+  });
 
-  const renderPlayer = ({ item }: { item: Player }) => (
+  const renderPlayer = ({ item }: { item: Player; }) => (
     <TouchableOpacity style={styles.playerCard}>
       <View style={styles.playerInfo}>
         <View style={styles.avatarContainer}>
@@ -84,14 +84,14 @@ export function CoachRoster({ navigation }: Props) {
         <View style={[styles.statusDot, { backgroundColor: getStatusColor(item.status) }]} />
       </View>
     </TouchableOpacity>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Welcome")}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#1F2937" />
           </TouchableOpacity>
           <View>
@@ -168,7 +168,7 @@ export function CoachRoster({ navigation }: Props) {
         </View>
       </View>
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -345,4 +345,4 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     marginTop: 2,
   },
-})
+});

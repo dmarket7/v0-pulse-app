@@ -18,7 +18,7 @@ import { LoadingScreen } from "./src/components/LoadingScreen";
 export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
-  FamilyDashboard: { userRole: "parent" | "coach"; };
+  FamilyDashboard: { userRole?: "parent" | "coach"; };
   DailyRecommendation: { childId: string; childName: string; };
   CoachRoster: undefined;
   HealthInput: { childId: string; };
@@ -53,7 +53,6 @@ function AppNavigator() {
             <Stack.Screen
               name="FamilyDashboard"
               component={FamilyDashboard}
-              initialParams={{ userRole: "parent" }}
             />
             <Stack.Screen name="DailyRecommendation" component={DailyRecommendation} />
             <Stack.Screen name="CoachRoster" component={CoachRoster} />
