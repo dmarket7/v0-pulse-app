@@ -39,6 +39,7 @@ export interface SignUpRequest {
   email: string;
   password: string;
   full_name?: string;
+  role?: 'parent' | 'coach';
   metadata?: Record<string, any>;
 }
 

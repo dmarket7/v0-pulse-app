@@ -31,6 +31,7 @@ export function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState<'parent' | 'coach'>('parent');
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +59,7 @@ export function LoginScreen({ navigation }: Props) {
           email: email.trim(),
           password,
           full_name: fullName.trim(),
+          role,
         });
         // Navigation will be handled by the auth state change
         // The signUp function now automatically signs in the user
@@ -94,6 +96,7 @@ export function LoginScreen({ navigation }: Props) {
     setEmail('');
     setPassword('');
     setFullName('');
+    setRole('parent');
   };
 
   return (
@@ -118,7 +121,7 @@ export function LoginScreen({ navigation }: Props) {
               </Text>
               <Text style={styles.subtitle}>
                 {isSignUp
-                  ? 'Join the Pulse community to track your athlete\'s health and performance'
+                  ? 'Join the Pulse community to track and support young athletes\' health and performance'
                   : 'Sign in to continue tracking your athlete\'s journey'
                 }
               </Text>
@@ -127,18 +130,68 @@ export function LoginScreen({ navigation }: Props) {
             {/* Form */}
             <View style={styles.form}>
               {isSignUp && (
-                <View style={styles.inputContainer}>
-                  <Ionicons name="person-outline" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Full Name"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={fullName}
-                    onChangeText={setFullName}
-                    autoCapitalize="words"
-                    autoComplete="name"
-                  />
-                </View>
+                <>
+                  <View style={styles.inputContainer}>
+                    <Ionicons name="person-outline" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Full Name"
+                      placeholderTextColor={Colors.textSecondary}
+                      value={fullName}
+                      onChangeText={setFullName}
+                      autoCapitalize="words"
+                      autoComplete="name"
+                    />
+                  </View>
+
+                  {/* Role Selection */}
+                  <View style={styles.roleContainer}>
+                    <Text style={styles.roleLabel}>I am a:</Text>
+                    <View style={styles.roleButtons}>
+                      <TouchableOpacity
+                        style={[
+                          styles.roleButton,
+                          role === 'parent' && styles.roleButtonActive
+                        ]}
+                        onPress={() => setRole('parent')}
+                      >
+                        <Ionicons
+                          name="home-outline"
+                          size={20}
+                          color={role === 'parent' ? Colors.white : Colors.textSecondary}
+                          style={styles.roleIcon}
+                        />
+                        <Text style={[
+                          styles.roleButtonText,
+                          role === 'parent' && styles.roleButtonTextActive
+                        ]}>
+                          Parent
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[
+                          styles.roleButton,
+                          role === 'coach' && styles.roleButtonActive
+                        ]}
+                        onPress={() => setRole('coach')}
+                      >
+                        <Ionicons
+                          name="trophy-outline"
+                          size={20}
+                          color={role === 'coach' ? Colors.white : Colors.textSecondary}
+                          style={styles.roleIcon}
+                        />
+                        <Text style={[
+                          styles.roleButtonText,
+                          role === 'coach' && styles.roleButtonTextActive
+                        ]}>
+                          Coach
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
               )}
 
               <View style={styles.inputContainer}>
@@ -374,5 +427,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     marginLeft: 8,
+  },
+  roleContainer: {
+    marginBottom: 16,
+  },
+  roleLabel: {
+    color: Colors.textSecondary,
+    fontSize: 16,
+    marginBottom: 12,
+    fontWeight: '500',
+  },
+  roleButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  roleButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.secondaryLight,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+  },
+  roleButtonActive: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  roleIcon: {
+    marginRight: 8,
+  },
+  roleButtonText: {
+    color: Colors.textSecondary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  roleButtonTextActive: {
+    color: Colors.white,
   },
 });
