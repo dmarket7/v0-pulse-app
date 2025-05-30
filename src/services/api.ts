@@ -87,6 +87,36 @@ export interface ApiError {
   details?: any;
 }
 
+// Child account creation types
+export interface CreateChildRequest {
+  name: string;
+  email?: string;
+  password?: string;
+  create_auth_account: boolean;
+}
+
+export interface CreateChildWithAuthRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface CreateChildResponse {
+  message: string;
+  child_id?: string;
+  email?: string;
+}
+
+export interface Child {
+  id: string;
+  name: string;
+  email?: string;
+  auth_user_id?: string;
+  parent_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export type SportType = 'soccer' | 'basketball' | 'tennis' | 'swimming' | 'track' | 'other';
 
 class ApiService {
@@ -233,6 +263,38 @@ class ApiService {
 
   async getHealthLogs(childId: string): Promise<HealthLogRead[]> {
     return this.request(`/api/v1/health-logs/${childId}`);
+  }
+
+  // Child account endpoints
+  async createChild(data: CreateChildRequest): Promise<CreateChildResponse> {
+    return this.request('/api/v1/children/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async createChildWithAuth(data: CreateChildWithAuthRequest): Promise<CreateChildResponse> {
+    return this.request('/api/v1/children/with-auth', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getChildren(): Promise<Child[]> {
+    return this.request('/api/v1/children/');
+  }
+
+  async updateChild(childId: string, data: Partial<CreateChildRequest>): Promise<Child> {
+    return this.request(`/api/v1/children/${childId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteChild(childId: string): Promise<any> {
+    return this.request(`/api/v1/children/${childId}`, {
+      method: 'DELETE',
+    });
   }
 }
 

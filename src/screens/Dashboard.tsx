@@ -8,6 +8,7 @@ import { RootStackParamList } from '../../App';
 import { Colors } from '../constants/colors';
 import { useAuth } from '../contexts/AuthContext';
 import { NavigationMenu } from '../components/NavigationMenu';
+import { CreateChildModal } from '../components/CreateChildModal';
 
 type DashboardRouteProp = RouteProp<RootStackParamList, 'Dashboard'>;
 type DashboardNavigationProp = StackNavigationProp<RootStackParamList, 'Dashboard'>;
@@ -17,6 +18,7 @@ export function Dashboard() {
   const route = useRoute<DashboardRouteProp>();
   const { user } = useAuth();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [isCreateChildModalVisible, setIsCreateChildModalVisible] = useState(false);
 
   // Get user role from authenticated user data, fallback to route params, then default to 'parent'
   const userRole = (user?.user_metadata?.role as 'parent' | 'coach') || route.params?.userRole || 'parent';
@@ -130,6 +132,25 @@ export function Dashboard() {
                   : 'Track your athlete\'s health and performance journey'
                 }
               </Text>
+
+              {/* Create Child Button - Only for Parents */}
+              {userRole === 'parent' && (
+                <TouchableOpacity
+                  style={styles.createChildButton}
+                  onPress={() => setIsCreateChildModalVisible(true)}
+                >
+                  <View style={styles.createChildButtonContent}>
+                    <View style={styles.createChildIcon}>
+                      <Ionicons name="person-add" size={20} color="white" />
+                    </View>
+                    <View style={styles.createChildText}>
+                      <Text style={styles.createChildTitle}>Create Child Account</Text>
+                      <Text style={styles.createChildDescription}>Add a new child to track their health journey</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Quick Stats Placeholder */}
@@ -224,6 +245,16 @@ export function Dashboard() {
           onClose={() => setIsMenuVisible(false)}
           navigationItems={navigationItems}
           userRole={userRole}
+        />
+
+        {/* Create Child Modal */}
+        <CreateChildModal
+          isVisible={isCreateChildModalVisible}
+          onClose={() => setIsCreateChildModalVisible(false)}
+          onSuccess={() => {
+            // Optionally refresh data or show success message
+            console.log('Child account created successfully');
+          }}
         />
       </SafeAreaView>
     </LinearGradient>
@@ -370,6 +401,34 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   activityTime: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  createChildButton: {
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginTop: 16,
+  },
+  createChildButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  createChildIcon: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  createChildText: {
+    flex: 1,
+  },
+  createChildTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  createChildDescription: {
     fontSize: 12,
     color: Colors.textSecondary,
   },
