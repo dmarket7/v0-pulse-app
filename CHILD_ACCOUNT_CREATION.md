@@ -42,10 +42,8 @@ The Pulse app now includes a comprehensive child account creation feature that a
 When creating a login account, passwords must meet these security requirements:
 
 - At least 8 characters long
-- Contains uppercase letters (A-Z)
-- Contains lowercase letters (a-z)
-- Contains at least one number (0-9)
-- Contains at least one special character (!@#$%^&\*(),.?":{}|<>)
+- Contains at least one letter
+- Contains at least one number
 
 ## API Integration
 

@@ -38,10 +38,8 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
   const validatePassword = (password: string) => {
     const requirements = [
       { regex: /.{8,}/, text: 'At least 8 characters' },
-      { regex: /[A-Z]/, text: 'Uppercase letter' },
-      { regex: /[a-z]/, text: 'Lowercase letter' },
-      { regex: /\d/, text: 'Number' },
-      { regex: /[!@#$%^&*(),.?":{}|<>]/, text: 'Special character' },
+      { regex: /[a-zA-Z]/, text: 'At least one letter' },
+      { regex: /\d/, text: 'At least one number' },
     ];
 
     const passed = requirements.filter((req) => req.regex.test(password));
@@ -277,9 +275,8 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
                           <Text style={styles.requirementsTitle}>Password Requirements:</Text>
                           <View style={styles.requirementsList}>
                             <Text style={styles.requirement}>• At least 8 characters</Text>
-                            <Text style={styles.requirement}>• Uppercase and lowercase letters</Text>
+                            <Text style={styles.requirement}>• At least one letter</Text>
                             <Text style={styles.requirement}>• At least one number</Text>
-                            <Text style={styles.requirement}>• At least one special character</Text>
                           </View>
                         </View>
                       </>
