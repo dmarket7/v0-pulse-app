@@ -135,6 +135,15 @@ class ApiService {
     this.authToken = null;
   }
 
+  // Create a timeout signal that's compatible with React Native
+  private createTimeoutSignal(timeoutMs: number): AbortSignal {
+    const controller = new AbortController();
+    setTimeout(() => {
+      controller.abort();
+    }, timeoutMs);
+    return controller.signal;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -158,8 +167,8 @@ class ApiService {
       const response = await fetch(url, {
         ...options,
         headers,
-        // Add timeout for better error handling
-        signal: AbortSignal.timeout(30000), // 30 second timeout
+        // Add timeout for better error handling - using custom timeout for React Native compatibility
+        signal: this.createTimeoutSignal(30000), // 30 second timeout
       });
 
       if (!response.ok) {

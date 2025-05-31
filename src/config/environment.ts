@@ -2,21 +2,6 @@
 // In Expo, environment variables are available at build time
 // and need to be prefixed with EXPO_PUBLIC_ to be accessible in client code
 
-const getEnvVar = (key: string, defaultValue: string): string => {
-  // In Expo, environment variables are injected at build time
-  // @ts-ignore - Expo injects environment variables at build time
-  const env = typeof process !== 'undefined' ? process.env : {};
-  const value = env[key];
-
-  // Debug logging to help identify environment variable issues
-  if (__DEV__) {
-    console.log(`Environment variable ${key}:`, value || 'undefined');
-    console.log('All EXPO_PUBLIC_ variables:', Object.keys(env).filter(k => k.startsWith('EXPO_PUBLIC_')));
-  }
-
-  return value || defaultValue;
-};
-
 // Validate API URL format
 const validateApiUrl = (url: string): boolean => {
   try {
@@ -27,7 +12,13 @@ const validateApiUrl = (url: string): boolean => {
   }
 };
 
-const API_BASE_URL = getEnvVar('EXPO_PUBLIC_API_BASE_URL', 'http://127.0.0.1:8000');
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000';
+
+// Debug logging in development to help identify environment variable issues
+if (__DEV__) {
+  console.log('EXPO_PUBLIC_API_BASE_URL:', process.env.EXPO_PUBLIC_API_BASE_URL || 'undefined');
+  console.log('Using API_BASE_URL:', API_BASE_URL);
+}
 
 // Validate the API URL
 if (!validateApiUrl(API_BASE_URL)) {

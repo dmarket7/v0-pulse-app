@@ -26,6 +26,7 @@
     "react-native-screens": "latest"
   },
   "devDependencies": {
+    "@types/node": "^22.15.29",
     "@types/react": "19.0.0",
     "typescript": "^5"
   }
