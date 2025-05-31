@@ -42,7 +42,7 @@ export function HealthInput({ navigation }: Props) {
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Monthly Health Check</Text>
+          <Text style={styles.headerTitle}>Daily Health Check</Text>
           <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
             <Ionicons name="close" size={24} color={Colors.textPrimary} />
           </TouchableOpacity>
@@ -71,87 +71,6 @@ export function HealthInput({ navigation }: Props) {
                     <Text style={styles.radioLabel}>{option.label}</Text>
                   </TouchableOpacity>
                 ))}
-              </View>
-            </View>
-
-            {/* Flexibility */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View style={[styles.iconContainer, { backgroundColor: Colors.success }]}>
-                  <Ionicons name="body" size={20} color="white" />
-                </View>
-                <Text style={styles.sectionTitle}>Perceived Flexibility</Text>
-              </View>
-              <View style={styles.sliderContainer}>
-                <View style={styles.sliderLabels}>
-                  <Text style={styles.sliderLabel}>Very Tight</Text>
-                  <Text style={styles.sliderLabel}>Very Flexible</Text>
-                </View>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={1}
-                  maximumValue={10}
-                  step={1}
-                  value={flexibility}
-                  onValueChange={setFlexibility}
-                  minimumTrackTintColor={Colors.success}
-                  maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
-                />
-                <Text style={styles.sliderValue}>{flexibility}/10</Text>
-              </View>
-            </View>
-
-            {/* Energy Level */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View style={[styles.iconContainer, { backgroundColor: Colors.warning }]}>
-                  <Ionicons name="flash" size={20} color="white" />
-                </View>
-                <Text style={styles.sectionTitle}>Energy Level</Text>
-              </View>
-              <View style={styles.sliderContainer}>
-                <View style={styles.sliderLabels}>
-                  <Text style={styles.sliderLabel}>Very Low</Text>
-                  <Text style={styles.sliderLabel}>Very High</Text>
-                </View>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={1}
-                  maximumValue={10}
-                  step={1}
-                  value={energy}
-                  onValueChange={setEnergy}
-                  minimumTrackTintColor={Colors.warning}
-                  maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
-                />
-                <Text style={styles.sliderValue}>{energy}/10</Text>
-              </View>
-            </View>
-
-            {/* Sleep Quality */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View style={[styles.iconContainer, { backgroundColor: Colors.secondary }]}>
-                  <Ionicons name="moon" size={20} color="white" />
-                </View>
-                <Text style={styles.sectionTitle}>Sleep Quality (Last Night)</Text>
-              </View>
-              <View style={styles.sliderContainer}>
-                <View style={styles.sliderLabels}>
-                  <Text style={styles.sliderLabel}>Very Poor</Text>
-                  <Text style={styles.sliderLabel}>Excellent</Text>
-                </View>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={1}
-                  maximumValue={10}
-                  step={1}
-                  value={sleep}
-                  onValueChange={setSleep}
-                  minimumTrackTintColor={Colors.secondary}
-                  maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
-                />
-                <Text style={styles.sliderValue}>{sleep}/10</Text>
               </View>
             </View>
           </View>
