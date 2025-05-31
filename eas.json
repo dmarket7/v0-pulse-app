@@ -10,9 +10,6 @@
       "ios": {
         "resourceClass": "m-medium",
         "autoIncrement": true
-      },
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://pulse-backend-kxwl4us5la-uw.a.run.app"
       }
     },
     "preview": {
@@ -20,18 +17,12 @@
       "ios": {
         "resourceClass": "m-medium",
         "autoIncrement": true
-      },
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://pulse-backend-kxwl4us5la-uw.a.run.app"
       }
     },
     "production": {
       "ios": {
         "resourceClass": "m-medium",
         "autoIncrement": true
-      },
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://pulse-backend-kxwl4us5la-uw.a.run.app"
       }
     }
   },
