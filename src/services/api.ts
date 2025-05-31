@@ -149,10 +149,17 @@ class ApiService {
       headers.Authorization = `Bearer ${this.authToken}`;
     }
 
+    // Log the request URL in development or if there are issues
+    if (__DEV__) {
+      console.log(`[API] ${options.method || 'GET'} ${url}`);
+    }
+
     try {
       const response = await fetch(url, {
         ...options,
         headers,
+        // Add timeout for better error handling
+        signal: AbortSignal.timeout(30000), // 30 second timeout
       });
 
       if (!response.ok) {
@@ -162,12 +169,29 @@ class ApiService {
           status: response.status,
           details: errorData,
         };
+
+        // Enhanced error logging
+        console.error(`[API Error] ${response.status} ${url}:`, error);
         throw error;
       }
 
       return await response.json();
     } catch (error) {
-      console.error('API request failed:', error);
+      // Enhanced error handling with network-specific messages
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error(`[Network Error] Failed to connect to API: ${url}`);
+        console.error('This usually indicates:');
+        console.error('1. The API server is down');
+        console.error('2. Network connectivity issues');
+        console.error('3. Incorrect API base URL');
+        console.error('4. CORS issues (web only)');
+        console.error('Current API base URL:', this.baseUrl);
+      } else if (error instanceof Error && error.name === 'AbortError') {
+        console.error(`[Timeout Error] Request to ${url} timed out after 30 seconds`);
+      } else {
+        console.error(`[API Request Failed] ${url}:`, error);
+      }
+
       throw error;
     }
   }
