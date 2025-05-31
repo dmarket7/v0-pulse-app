@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "e7af1917-6fcc-42bc-9f47-e9dbcaeaaf8b"
+      }
+    },
+    "owner": "dmarket7",
+    "slug": "pulse-app-v1",
+    "name": "Pulse",
+    "icon": "./assets/craft-logo.png",
+    "ios": {
+      "bundleIdentifier": "com.dariomercado.pulse-v1.demo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#ffffff"
+    }
+  }
+}
