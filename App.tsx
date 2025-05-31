@@ -4,7 +4,6 @@ import { StatusBar } from "expo-status-bar";
 import { WelcomeScreen } from "./src/screens/WelcomeScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import { Dashboard } from "./src/screens/Dashboard";
-import { DailyRecommendation } from "./src/screens/DailyRecommendation";
 import { CoachRoster } from "./src/screens/CoachRoster";
 import { HealthInput } from "./src/screens/HealthInput";
 import { CalendarScreen } from "./src/screens/CalendarScreen";
@@ -19,7 +18,6 @@ export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
   Dashboard: { userRole?: "parent" | "coach"; };
-  DailyRecommendation: { childId: string; childName: string; };
   CoachRoster: undefined;
   HealthInput: { childId: string; };
   Calendar: undefined;
@@ -54,7 +52,6 @@ function AppNavigator() {
               name="Dashboard"
               component={Dashboard}
             />
-            <Stack.Screen name="DailyRecommendation" component={DailyRecommendation} />
             <Stack.Screen name="CoachRoster" component={CoachRoster} />
             <Stack.Screen name="HealthInput" component={HealthInput} />
             <Stack.Screen name="Calendar" component={CalendarScreen} />

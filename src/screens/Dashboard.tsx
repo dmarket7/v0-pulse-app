@@ -35,16 +35,6 @@ export function Dashboard() {
   const getRoleSpecificNavigationItems = () => {
     const commonItems = [
       {
-        id: 'daily-recommendations',
-        title: 'Daily Recommendations',
-        description: userRole === 'coach'
-          ? 'View team health recommendations'
-          : 'View personalized daily health recommendations',
-        icon: 'heart',
-        color: Colors.primary,
-        onPress: () => navigateToScreen('DailyRecommendation', { childId: '1', childName: userRole === 'coach' ? 'Team' : 'Child' }),
-      },
-      {
         id: 'health-input',
         title: 'Health Input',
         description: userRole === 'coach'
@@ -192,6 +182,68 @@ export function Dashboard() {
                     {userRole === 'coach' ? 'Upcoming Games' : 'Appointments'}
                   </Text>
                 </View>
+              </View>
+            </View>
+
+            {/* Daily Recommendation Section */}
+            <View style={styles.recommendationSection}>
+              <Text style={styles.sectionTitle}>
+                {userRole === 'coach' ? 'Team Readiness' : 'Today\'s Recommendation'}
+              </Text>
+
+              <View style={styles.recommendationCard}>
+                <View style={styles.recommendationHeader}>
+                  <Text style={styles.recommendationQuestion}>
+                    {userRole === 'coach' ? 'Team Ready for Hard Training?' : 'Play Hard Today?'}
+                  </Text>
+
+                  <View style={styles.recommendationAnswer}>
+                    <View style={[styles.answerCircle, { backgroundColor: Colors.success }]}>
+                      <Ionicons name="flash" size={24} color="white" />
+                      <Text style={styles.answerText}>YES</Text>
+                    </View>
+                  </View>
+                </View>
+
+                <Text style={styles.recommendationDescription}>
+                  {userRole === 'coach'
+                    ? 'Your team is ready for high intensity training today.'
+                    : `${user?.user_metadata?.full_name} is ready for high intensity training today.`
+                  }
+                </Text>
+
+                <View style={styles.recommendationStats}>
+                  <View style={styles.recommendationStatItem}>
+                    <View style={[styles.statIcon, { backgroundColor: "rgba(59, 130, 246, 0.3)" }]}>
+                      <Ionicons name="heart" size={16} color="white" />
+                    </View>
+                    <View style={styles.statInfo}>
+                      <Text style={styles.statTitle}>Recovery Score</Text>
+                      <Text style={styles.statSubtitle}>From Whoop</Text>
+                    </View>
+                    <View style={styles.statBadge}>
+                      <Text style={styles.statValue}>85%</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.recommendationStatItem}>
+                    <View style={[styles.statIcon, { backgroundColor: "rgba(139, 92, 246, 0.3)" }]}>
+                      <Ionicons name="trending-up" size={16} color="white" />
+                    </View>
+                    <View style={styles.statInfo}>
+                      <Text style={styles.statTitle}>Training Load</Text>
+                      <Text style={styles.statSubtitle}>Last 7 days</Text>
+                    </View>
+                    <View style={[styles.statBadge, { backgroundColor: "#F59E0B" }]}>
+                      <Text style={styles.statValue}>Moderate</Text>
+                    </View>
+                  </View>
+                </View>
+
+                <TouchableOpacity style={styles.seeMoreButton}>
+                  <Text style={styles.seeMoreText}>See Detailed Analysis</Text>
+                  <Ionicons name="arrow-forward" size={16} color="white" />
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -431,5 +483,100 @@ const styles = StyleSheet.create({
   createChildDescription: {
     fontSize: 12,
     color: Colors.textSecondary,
+  },
+  recommendationSection: {
+    gap: 16,
+  },
+  recommendationCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    padding: 20,
+    gap: 16,
+  },
+  recommendationHeader: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  recommendationQuestion: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+  },
+  recommendationAnswer: {
+    alignItems: 'center',
+  },
+  answerCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  answerText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+    marginTop: 2,
+  },
+  recommendationDescription: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  recommendationStats: {
+    gap: 12,
+  },
+  recommendationStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 12,
+  },
+  statInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  statTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  statSubtitle: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  statBadge: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  seeMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  seeMoreText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: 'white',
   },
 });
