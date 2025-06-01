@@ -18,10 +18,10 @@ export function Dashboard() {
   const route = useRoute<DashboardRouteProp>();
   const { user } = useAuth();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
-  const [isCreateChildModalVisible, setIsCreateChildModalVisible] = useState(false);
+  const [isCreatePlayerModalVisible, setIsCreatePlayerModalVisible] = useState(false);
 
   // Get user role from authenticated user data, fallback to route params, then default to 'parent'
-  const userRole = (user?.user_metadata?.role as 'parent' | 'coach') || route.params?.userRole || 'parent';
+  const userRole = (user?.user_metadata?.role as 'parent' | 'coach' | 'child') || route.params?.userRole || 'parent';
 
   const navigateToScreen = (screenName: keyof RootStackParamList, params?: any) => {
     navigation.navigate(screenName as any, params);
@@ -30,6 +30,19 @@ export function Dashboard() {
   // Role-specific content and styling
   const getDashboardTitle = () => {
     return userRole === 'coach' ? 'Coach Dashboard' : 'Dashboard';
+  };
+
+  // Get role-appropriate terminology
+  const getPlayerChildTerminology = () => {
+    if (userRole === 'parent') return 'child';
+    if (userRole === 'child') return 'player';
+    return 'player'; // default for coach
+  };
+
+  // Get role-appropriate display text for badges
+  const getRoleDisplayText = () => {
+    if (userRole === 'child') return 'player';
+    return userRole; // 'parent' or 'coach' stay as is
   };
 
   const getRoleSpecificNavigationItems = () => {
@@ -96,13 +109,13 @@ export function Dashboard() {
             <View>
               <Text style={styles.title}>{getDashboardTitle()}</Text>
               <View style={styles.roleContainer}>
-                <View style={[styles.roleBadge, { backgroundColor: userRole === 'coach' ? Colors.secondary : Colors.primary }]}>
+                <View style={[styles.roleBadge, { backgroundColor: userRole === 'coach' ? Colors.secondary : userRole === 'parent' ? Colors.primary : Colors.accent }]}>
                   <Ionicons
-                    name={userRole === 'coach' ? 'people' : 'home'}
+                    name={userRole === 'coach' ? 'people' : userRole === 'parent' ? 'home' : 'school'}
                     size={16}
                     color="white"
                   />
-                  <Text style={styles.roleText}>{userRole}</Text>
+                  <Text style={styles.roleText}>{getRoleDisplayText()}</Text>
                 </View>
               </View>
             </View>
@@ -123,24 +136,43 @@ export function Dashboard() {
                 }
               </Text>
 
-              {/* Create Child Button - Only for Parents */}
+              {/* Create Child/Player Button - Only for Parents */}
               {userRole === 'parent' && (
                 <TouchableOpacity
-                  style={styles.createChildButton}
-                  onPress={() => setIsCreateChildModalVisible(true)}
+                  style={styles.createPlayerButton}
+                  onPress={() => setIsCreatePlayerModalVisible(true)}
                 >
-                  <View style={styles.createChildButtonContent}>
-                    <View style={styles.createChildIcon}>
+                  <View style={styles.createPlayerButtonContent}>
+                    <View style={styles.createPlayerIcon}>
                       <Ionicons name="person-add" size={20} color="white" />
                     </View>
-                    <View style={styles.createChildText}>
-                      <Text style={styles.createChildTitle}>Create Child Account</Text>
-                      <Text style={styles.createChildDescription}>Add a new child to track their health journey</Text>
+                    <View style={styles.createPlayerText}>
+                      <Text style={styles.createPlayerTitle}>Create {getPlayerChildTerminology()} Account</Text>
+                      <Text style={styles.createPlayerDescription}>Add a new {getPlayerChildTerminology()} to track their health journey</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
                   </View>
                 </TouchableOpacity>
               )}
+
+              {/* Health Input Button */}
+              <TouchableOpacity
+                style={styles.healthInputButton}
+                onPress={() => navigateToScreen('HealthInput')}
+              >
+                <View style={styles.healthInputButtonContent}>
+                  <View style={styles.healthInputIcon}>
+                    <Ionicons name="fitness" size={20} color="white" />
+                  </View>
+                  <View style={styles.healthInputText}>
+                    <Text style={styles.healthInputTitle}>Log Health Data</Text>
+                    <Text style={styles.healthInputDescription}>
+                      {userRole === 'coach' ? 'Log team health metrics and training data' : 'Record health metrics and training readiness'}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
+                </View>
+              </TouchableOpacity>
             </View>
 
             {/* Quick Stats Placeholder */}
@@ -299,13 +331,13 @@ export function Dashboard() {
           userRole={userRole}
         />
 
-        {/* Create Child Modal */}
+        {/* Create Player Modal */}
         <CreateChildModal
-          isVisible={isCreateChildModalVisible}
-          onClose={() => setIsCreateChildModalVisible(false)}
+          isVisible={isCreatePlayerModalVisible}
+          onClose={() => setIsCreatePlayerModalVisible(false)}
           onSuccess={() => {
             // Optionally refresh data or show success message
-            console.log('Child account created successfully');
+            console.log(`${getPlayerChildTerminology()} account created successfully`);
           }}
         />
       </SafeAreaView>
@@ -456,31 +488,61 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textSecondary,
   },
-  createChildButton: {
+  createPlayerButton: {
     padding: 12,
     borderRadius: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     marginTop: 16,
   },
-  createChildButtonContent: {
+  createPlayerButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
-  createChildIcon: {
+  createPlayerIcon: {
     padding: 8,
     borderRadius: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
-  createChildText: {
+  createPlayerText: {
     flex: 1,
   },
-  createChildTitle: {
+  createPlayerTitle: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  createChildDescription: {
+  createPlayerDescription: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  healthInputButton: {
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    marginTop: 12,
+  },
+  healthInputButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  healthInputIcon: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: Colors.success,
+  },
+  healthInputText: {
+    flex: 1,
+  },
+  healthInputTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  healthInputDescription: {
     fontSize: 12,
     color: Colors.textSecondary,
   },

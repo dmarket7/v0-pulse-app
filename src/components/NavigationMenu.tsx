@@ -32,7 +32,7 @@ interface NavigationMenuProps {
   isVisible: boolean;
   onClose: () => void;
   navigationItems: NavigationItem[];
-  userRole: 'parent' | 'coach';
+  userRole: 'parent' | 'coach' | 'child';
 }
 
 export function NavigationMenu({ isVisible, onClose, navigationItems, userRole }: NavigationMenuProps) {
@@ -86,6 +86,12 @@ export function NavigationMenu({ isVisible, onClose, navigationItems, userRole }
     );
   };
 
+  // Get role-appropriate display text
+  const getRoleDisplayText = () => {
+    if (userRole === 'child') return 'player';
+    return userRole; // 'parent' or 'coach' stay as is
+  };
+
   return (
     <Modal
       visible={isVisible}
@@ -120,7 +126,7 @@ export function NavigationMenu({ isVisible, onClose, navigationItems, userRole }
                 <View style={styles.userInfo}>
                   <View style={styles.avatarContainer}>
                     <Ionicons
-                      name={userRole === 'coach' ? 'people' : 'person'}
+                      name={userRole === 'coach' ? 'people' : userRole === 'parent' ? 'person' : 'school'}
                       size={24}
                       color="white"
                     />
@@ -129,8 +135,8 @@ export function NavigationMenu({ isVisible, onClose, navigationItems, userRole }
                     {user?.email && (
                       <Text style={styles.userEmail}>{user.email}</Text>
                     )}
-                    <View style={[styles.roleBadge, { backgroundColor: userRole === 'coach' ? Colors.secondary : Colors.primary }]}>
-                      <Text style={styles.roleText}>{userRole}</Text>
+                    <View style={[styles.roleBadge, { backgroundColor: userRole === 'coach' ? Colors.secondary : userRole === 'parent' ? Colors.primary : Colors.accent }]}>
+                      <Text style={styles.roleText}>{getRoleDisplayText()}</Text>
                     </View>
                   </View>
                 </View>

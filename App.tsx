@@ -17,7 +17,7 @@ import { LoadingScreen } from "./src/components/LoadingScreen";
 export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
-  Dashboard: { userRole?: "parent" | "coach"; };
+  Dashboard: { userRole?: "parent" | "coach" | "child"; };
   CoachRoster: undefined;
   HealthInput: undefined;
   Calendar: undefined;
