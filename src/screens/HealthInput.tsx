@@ -131,18 +131,19 @@ export function HealthInput({ navigation, route }: Props) {
     }
 
     setIsLoading(true);
-    try {
-      const healthLogData: HealthLogCreate = {
-        child_id: childId, // Use the database child ID from helper endpoint
-        date: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
-        on_period_today: onPeriodToday,
-        has_injury: hasInjury,
-        injury_severity: hasInjury ? injurySeverity : undefined,
-        injury_type: hasInjury ? injuryType : undefined,
-        injury_location: hasInjury ? injuryLocation : undefined,
-        notes: notes.trim() || undefined,
-      };
 
+    const healthLogData: HealthLogCreate = {
+      child_id: childId, // Use the database child ID from helper endpoint
+      date: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+      on_period_today: onPeriodToday,
+      has_injury: hasInjury,
+      injury_severity: hasInjury ? injurySeverity : undefined,
+      injury_type: hasInjury ? injuryType : undefined,
+      injury_location: hasInjury ? injuryLocation : undefined,
+      notes: notes.trim() || undefined,
+    };
+
+    try {
       if (isEditing && existingHealthLog) {
         // Update existing health log
         console.log('Updating health log with data:', healthLogData);
@@ -164,9 +165,33 @@ export function HealthInput({ navigation, route }: Props) {
           [{ text: "OK", onPress: () => navigation.goBack() }]
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save health log:', error);
-      Alert.alert("Error", "Failed to save health log. Please try again.");
+
+      // Provide more specific error messages
+      let errorMessage = "Failed to save health log. Please try again.";
+
+      if (error.status === 422) {
+        errorMessage = "Invalid data provided. Please check your entries and try again.";
+      } else if (error.status === 401 || error.status === 403) {
+        errorMessage = "You don't have permission to perform this action.";
+      } else if (error.status === 404) {
+        errorMessage = "Health log not found. Please refresh and try again.";
+      } else if (error.status >= 500) {
+        errorMessage = "Server error. Please try again later.";
+      }
+
+      // Log detailed error for debugging
+      console.error('Error details:', {
+        status: error.status,
+        message: error.message,
+        details: error.details,
+        payload: healthLogData,
+        isEditing,
+        existingHealthLog: existingHealthLog?.id
+      });
+
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -307,11 +307,40 @@ class ApiService {
     }
   }
 
-  async updateHealthLog(logId: string, data: Partial<HealthLogCreate>): Promise<HealthLogRead> {
+  async deleteHealthLog(logId: string): Promise<any> {
     return this.request(`/api/v1/health-logs/${logId}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
+      method: 'DELETE',
     });
+  }
+
+  async updateHealthLog(logId: string, data: Partial<HealthLogCreate>): Promise<HealthLogRead> {
+    // Since the backend may not have a PUT endpoint, we'll use delete and recreate
+    try {
+      // Remove child_id from update data since it's implied by the log ID
+      // This includes all other fields: date, on_period_today, has_injury,
+      // injury_severity, injury_type, injury_location, notes
+      const { child_id, ...updateData } = data;
+
+      // First try the PUT method (in case it exists)
+      return await this.request(`/api/v1/health-logs/${logId}`, {
+        method: 'PUT',
+        body: JSON.stringify(updateData),
+      });
+    } catch (error: any) {
+      // If PUT fails with 404 or 405, try delete and recreate
+      if (error.status === 404 || error.status === 405 || error.status === 422) {
+        console.log('PUT endpoint not available, using delete and recreate approach');
+
+        // Delete the existing log
+        await this.deleteHealthLog(logId);
+
+        // Create a new log with the updated data (including child_id for creation)
+        return await this.createHealthLog(data as HealthLogCreate);
+      }
+
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   async getChildIdFromAuth(authUserId: string): Promise<{ child_id: string; }> {
