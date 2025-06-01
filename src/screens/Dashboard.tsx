@@ -48,16 +48,6 @@ export function Dashboard() {
   const getRoleSpecificNavigationItems = () => {
     const commonItems = [
       {
-        id: 'health-input',
-        title: 'Health Input',
-        description: userRole === 'coach'
-          ? 'Log team health data and metrics'
-          : 'Log health data and metrics',
-        icon: 'fitness',
-        color: Colors.success,
-        onPress: () => navigateToScreen('HealthInput'),
-      },
-      {
         id: 'calendar',
         title: 'Calendar',
         description: userRole === 'coach'
@@ -77,9 +67,21 @@ export function Dashboard() {
       },
     ];
 
+    // Add health input for child users only
+    if (userRole === 'child') {
+      commonItems.unshift({
+        id: 'health-input',
+        title: 'Health Input',
+        description: 'Log health data and metrics',
+        icon: 'fitness',
+        color: Colors.success,
+        onPress: () => navigateToScreen('HealthInput'),
+      });
+    }
+
     // Add coach-specific item
     if (userRole === 'coach') {
-      commonItems.splice(1, 0, {
+      commonItems.splice(-2, 0, {
         id: 'coach-roster',
         title: 'Team Roster',
         description: 'Manage your team roster and player readiness',
@@ -155,24 +157,26 @@ export function Dashboard() {
                 </TouchableOpacity>
               )}
 
-              {/* Health Input Button */}
-              <TouchableOpacity
-                style={styles.healthInputButton}
-                onPress={() => navigateToScreen('HealthInput')}
-              >
-                <View style={styles.healthInputButtonContent}>
-                  <View style={styles.healthInputIcon}>
-                    <Ionicons name="fitness" size={20} color="white" />
+              {/* Health Input Button - Only for Child Users */}
+              {userRole === 'child' && (
+                <TouchableOpacity
+                  style={styles.healthInputButton}
+                  onPress={() => navigateToScreen('HealthInput')}
+                >
+                  <View style={styles.healthInputButtonContent}>
+                    <View style={styles.healthInputIcon}>
+                      <Ionicons name="fitness" size={20} color="white" />
+                    </View>
+                    <View style={styles.healthInputText}>
+                      <Text style={styles.healthInputTitle}>Log Health Data</Text>
+                      <Text style={styles.healthInputDescription}>
+                        Record health metrics and training readiness
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
                   </View>
-                  <View style={styles.healthInputText}>
-                    <Text style={styles.healthInputTitle}>Log Health Data</Text>
-                    <Text style={styles.healthInputDescription}>
-                      {userRole === 'coach' ? 'Log team health metrics and training data' : 'Record health metrics and training readiness'}
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Quick Stats Placeholder */}
