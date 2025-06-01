@@ -68,12 +68,11 @@ export interface UserResponse {
 export interface HealthLogCreate {
   child_id: string;
   date: string;
-  menstruation_started?: boolean;
-  period_flow?: string;
-  cramps?: boolean;
-  flexibility_level: string;
-  energy_level: string;
-  mood: string;
+  on_period_today?: boolean;
+  has_injury?: boolean;
+  injury_severity?: string;
+  injury_type?: string;
+  injury_location?: string;
   notes?: string;
 }
 
@@ -296,6 +295,10 @@ class ApiService {
 
   async getHealthLogs(childId: string): Promise<HealthLogRead[]> {
     return this.request(`/api/v1/health-logs/${childId}`);
+  }
+
+  async getChildIdFromAuth(authUserId: string): Promise<{ child_id: string; }> {
+    return this.request(`/api/v1/health-logs/child-id-from-auth/${authUserId}`);
   }
 
   // Child account endpoints

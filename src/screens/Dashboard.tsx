@@ -42,7 +42,7 @@ export function Dashboard() {
           : 'Log health data and metrics',
         icon: 'fitness',
         color: Colors.success,
-        onPress: () => navigateToScreen('HealthInput', { childId: '1' }),
+        onPress: () => navigateToScreen('HealthInput'),
       },
       {
         id: 'calendar',

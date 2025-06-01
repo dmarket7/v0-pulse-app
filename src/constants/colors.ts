@@ -30,6 +30,7 @@ export const Colors = {
   // Utility colors
   white: "#FFFFFF",
   black: "#000000",
+  disabled: "#6B7280", // Disabled state color
   gray: {
     50: "#F9FAFB",
     100: "#F3F4F6",
@@ -42,4 +43,4 @@ export const Colors = {
     800: "#1F2937",
     900: "#111827",
   },
-}
+};

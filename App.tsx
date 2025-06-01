@@ -19,7 +19,7 @@ export type RootStackParamList = {
   Login: undefined;
   Dashboard: { userRole?: "parent" | "coach"; };
   CoachRoster: undefined;
-  HealthInput: { childId: string; };
+  HealthInput: undefined;
   Calendar: undefined;
   Settings: undefined;
   HealthTips: undefined;
