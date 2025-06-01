@@ -9,7 +9,7 @@ import type { RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "../../App";
 import { Colors } from "../constants/colors";
 import { useAuth } from "../contexts/AuthContext";
-import { apiService, HealthLogCreate } from "../services/api";
+import { apiService, HealthLogCreate, HealthLogRead } from "../services/api";
 
 type HealthInputNavigationProp = StackNavigationProp<RootStackParamList, "HealthInput">;
 type HealthInputRouteProp = RouteProp<RootStackParamList, "HealthInput">;
@@ -29,6 +29,8 @@ export function HealthInput({ navigation, route }: Props) {
   // State for child data
   const [childId, setChildId] = useState<string | null>(null);
   const [isLoadingChild, setIsLoadingChild] = useState(true);
+  const [existingHealthLog, setExistingHealthLog] = useState<HealthLogRead | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [onPeriodToday, setOnPeriodToday] = useState(false);
   const [hasInjury, setHasInjury] = useState(false);
@@ -37,6 +39,37 @@ export function HealthInput({ navigation, route }: Props) {
   const [injuryLocation, setInjuryLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Function to populate form with existing health log data
+  const populateFormWithExistingData = (healthLog: HealthLogRead) => {
+    setOnPeriodToday(healthLog.on_period_today || false);
+    setHasInjury(healthLog.has_injury || false);
+    setInjurySeverity(healthLog.injury_severity || "");
+    setInjuryType(healthLog.injury_type || "");
+    setInjuryLocation(healthLog.injury_location || "");
+    setNotes(healthLog.notes || "");
+  };
+
+  // Check for existing health log for today
+  const checkForExistingHealthLog = async (childId: string) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const existingLog = await apiService.getHealthLogByDate(childId, today);
+
+      if (existingLog) {
+        setExistingHealthLog(existingLog);
+        setIsEditing(true);
+        populateFormWithExistingData(existingLog);
+        console.log('Found existing health log for today:', existingLog);
+      } else {
+        setIsEditing(false);
+        console.log('No existing health log found for today');
+      }
+    } catch (error) {
+      console.error('Failed to check for existing health log:', error);
+      setIsEditing(false);
+    }
+  };
 
   // Fetch child ID using the helper endpoint
   useEffect(() => {
@@ -54,6 +87,9 @@ export function HealthInput({ navigation, route }: Props) {
         if (response?.child_id) {
           setChildId(response.child_id);
           console.log('Found child ID:', response.child_id, 'for auth user:', user.id);
+
+          // Check for existing health log for today
+          await checkForExistingHealthLog(response.child_id);
         } else {
           console.error('No child ID returned for auth user:', user.id);
           Alert.alert(
@@ -107,14 +143,27 @@ export function HealthInput({ navigation, route }: Props) {
         notes: notes.trim() || undefined,
       };
 
-      console.log('Creating health log with data:', healthLogData);
-      await apiService.createHealthLog(healthLogData);
+      if (isEditing && existingHealthLog) {
+        // Update existing health log
+        console.log('Updating health log with data:', healthLogData);
+        await apiService.updateHealthLog(existingHealthLog.id, healthLogData);
 
-      Alert.alert(
-        "Success",
-        "Health log saved successfully!",
-        [{ text: "OK", onPress: () => navigation.goBack() }]
-      );
+        Alert.alert(
+          "Success",
+          "Health log updated successfully!",
+          [{ text: "OK", onPress: () => navigation.goBack() }]
+        );
+      } else {
+        // Create new health log
+        console.log('Creating health log with data:', healthLogData);
+        await apiService.createHealthLog(healthLogData);
+
+        Alert.alert(
+          "Success",
+          "Health log saved successfully!",
+          [{ text: "OK", onPress: () => navigation.goBack() }]
+        );
+      }
     } catch (error) {
       console.error('Failed to save health log:', error);
       Alert.alert("Error", "Failed to save health log. Please try again.");
@@ -162,12 +211,9 @@ export function HealthInput({ navigation, route }: Props) {
   ];
 
   const injuryTypeOptions = [
-    { value: "muscle_strain", label: "Muscle Strain" },
-    { value: "joint_pain", label: "Joint Pain" },
-    { value: "bruise", label: "Bruise" },
-    { value: "cut_abrasion", label: "Cut/Abrasion" },
-    { value: "sprain", label: "Sprain" },
-    { value: "fracture", label: "Fracture" },
+    { value: "muscle", label: "Muscle Injury" },
+    { value: "bone", label: "Bone Injury" },
+    { value: "ligament", label: "Joint/Ligament Pain" },
     { value: "other", label: "Other" },
   ];
 
@@ -175,19 +221,17 @@ export function HealthInput({ navigation, route }: Props) {
     { value: "head", label: "Head" },
     { value: "neck", label: "Neck" },
     { value: "shoulder", label: "Shoulder" },
-    { value: "arm", label: "Arm" },
-    { value: "elbow", label: "Elbow" },
-    { value: "wrist", label: "Wrist" },
-    { value: "hand", label: "Hand" },
     { value: "chest", label: "Chest" },
+    { value: "arm", label: "Arm" },
+    { value: "abdominal", label: "Abdominal" },
     { value: "back", label: "Back" },
-    { value: "abdomen", label: "Abdomen" },
     { value: "hip", label: "Hip" },
-    { value: "thigh", label: "Thigh" },
+    { value: "upper_leg", label: "Upper Leg" },
     { value: "knee", label: "Knee" },
-    { value: "shin", label: "Shin" },
+    { value: "lower_leg", label: "Lower Leg" },
     { value: "ankle", label: "Ankle" },
     { value: "foot", label: "Foot" },
+    { value: "other", label: "Other" },
   ];
 
   return (
@@ -195,7 +239,9 @@ export function HealthInput({ navigation, route }: Props) {
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Daily Health Check</Text>
+          <Text style={styles.headerTitle}>
+            {isEditing ? "Update Health Check" : "Daily Health Check"}
+          </Text>
           <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
             <Ionicons name="close" size={24} color={Colors.textPrimary} />
           </TouchableOpacity>
@@ -337,7 +383,10 @@ export function HealthInput({ navigation, route }: Props) {
             disabled={isLoading}
           >
             <Text style={styles.saveButtonText}>
-              {isLoading ? "Saving..." : "Save Health Data"}
+              {isLoading
+                ? (isEditing ? "Updating..." : "Saving...")
+                : (isEditing ? "Update Health Data" : "Save Health Data")
+              }
             </Text>
           </TouchableOpacity>
         </View>

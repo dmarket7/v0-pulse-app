@@ -297,6 +297,23 @@ class ApiService {
     return this.request(`/api/v1/health-logs/${childId}`);
   }
 
+  async getHealthLogByDate(childId: string, date: string): Promise<HealthLogRead | null> {
+    try {
+      const healthLogs = await this.getHealthLogs(childId);
+      return healthLogs.find(log => log.date === date) || null;
+    } catch (error) {
+      console.error('Failed to get health log by date:', error);
+      return null;
+    }
+  }
+
+  async updateHealthLog(logId: string, data: Partial<HealthLogCreate>): Promise<HealthLogRead> {
+    return this.request(`/api/v1/health-logs/${logId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
   async getChildIdFromAuth(authUserId: string): Promise<{ child_id: string; }> {
     return this.request(`/api/v1/health-logs/child-id-from-auth/${authUserId}`);
   }
