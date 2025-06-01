@@ -180,7 +180,7 @@ export function Dashboard() {
             </View>
 
             {/* Quick Stats Placeholder */}
-            <View style={styles.statsSection}>
+            {/* <View style={styles.statsSection}>
               <Text style={styles.sectionTitle}>Quick Overview</Text>
               <View style={styles.statsGrid}>
                 <View style={styles.statCard}>
@@ -219,7 +219,7 @@ export function Dashboard() {
                   </Text>
                 </View>
               </View>
-            </View>
+            </View> */}
 
             {/* Daily Recommendation Section */}
             <View style={styles.recommendationSection}>
@@ -284,7 +284,7 @@ export function Dashboard() {
             </View>
 
             {/* Recent Activity Placeholder */}
-            <View style={styles.activitySection}>
+            {/* <View style={styles.activitySection}>
               <Text style={styles.sectionTitle}>Recent Activity</Text>
               <View style={styles.activityList}>
                 <View style={styles.activityItem}>
@@ -323,7 +323,7 @@ export function Dashboard() {
                   </View>
                 </View>
               </View>
-            </View>
+            </View> */}
           </View>
         </ScrollView>
 
