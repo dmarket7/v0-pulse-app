@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, TextInput, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
 import { LinearGradient } from "expo-linear-gradient";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RouteProp } from "@react-navigation/native";
@@ -214,15 +213,16 @@ export function HealthInput({ navigation, route }: Props) {
                 <Text style={styles.sectionTitle}>Period Tracking</Text>
               </View>
 
-              <TouchableOpacity
-                style={styles.toggleOption}
-                onPress={() => setOnPeriodToday(!onPeriodToday)}
-              >
-                <View style={[styles.toggleButton, onPeriodToday && styles.toggleButtonActive]}>
-                  {onPeriodToday && <View style={styles.toggleButtonInner} />}
-                </View>
-                <Text style={styles.toggleLabel}>On your period today?</Text>
-              </TouchableOpacity>
+              <View style={styles.switchOption}>
+                <Text style={styles.switchLabel}>On your period today?</Text>
+                <Switch
+                  value={onPeriodToday}
+                  onValueChange={setOnPeriodToday}
+                  trackColor={{ false: "rgba(255, 255, 255, 0.2)", true: Colors.primary }}
+                  thumbColor={onPeriodToday ? Colors.secondary : "rgba(255, 255, 255, 0.8)"}
+                  ios_backgroundColor="rgba(255, 255, 255, 0.2)"
+                />
+              </View>
             </View>
 
             {/* Injury Status */}
@@ -234,15 +234,16 @@ export function HealthInput({ navigation, route }: Props) {
                 <Text style={styles.sectionTitle}>Injury Status</Text>
               </View>
 
-              <TouchableOpacity
-                style={styles.toggleOption}
-                onPress={() => setHasInjury(!hasInjury)}
-              >
-                <View style={[styles.toggleButton, hasInjury && styles.toggleButtonActive]}>
-                  {hasInjury && <View style={styles.toggleButtonInner} />}
-                </View>
-                <Text style={styles.toggleLabel}>Have an injury today?</Text>
-              </TouchableOpacity>
+              <View style={styles.switchOption}>
+                <Text style={styles.switchLabel}>Have an injury today?</Text>
+                <Switch
+                  value={hasInjury}
+                  onValueChange={setHasInjury}
+                  trackColor={{ false: "rgba(255, 255, 255, 0.2)", true: Colors.danger }}
+                  thumbColor={hasInjury ? Colors.secondary : "rgba(255, 255, 255, 0.8)"}
+                  ios_backgroundColor="rgba(255, 255, 255, 0.2)"
+                />
+              </View>
 
               {/* Injury Details - only show if injury exists */}
               {hasInjury && (
@@ -471,29 +472,22 @@ const styles = StyleSheet.create({
   saveButtonDisabled: {
     backgroundColor: Colors.disabled,
   },
+  switchOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: Colors.textPrimary,
+    flex: 1,
+  },
   toggleOption: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     paddingVertical: 8,
-  },
-  toggleButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.4)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  toggleButtonActive: {
-    borderColor: Colors.primary,
-  },
-  toggleButtonInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.primary,
   },
   toggleLabel: {
     fontSize: 16,
