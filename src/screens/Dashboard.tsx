@@ -9,6 +9,8 @@ import { Colors } from '../constants/colors';
 import { useAuth } from '../contexts/AuthContext';
 import { NavigationMenu } from '../components/NavigationMenu';
 import { CreateChildModal } from '../components/CreateChildModal';
+import { ChildDetailModal } from '../components/ChildDetailModal';
+import { apiService, Child } from '../services/api';
 
 type DashboardRouteProp = RouteProp<RootStackParamList, 'Dashboard'>;
 type DashboardNavigationProp = StackNavigationProp<RootStackParamList, 'Dashboard'>;
@@ -19,6 +21,10 @@ export function Dashboard() {
   const { user } = useAuth();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [isCreatePlayerModalVisible, setIsCreatePlayerModalVisible] = useState(false);
+  const [children, setChildren] = useState<Child[]>([]);
+  const [isLoadingChildren, setIsLoadingChildren] = useState(false);
+  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+  const [isChildDetailModalVisible, setIsChildDetailModalVisible] = useState(false);
 
   // Get user role from authenticated user data, fallback to route params, then default to 'parent'
   const userRole = (user?.user_metadata?.role as 'parent' | 'coach' | 'child') || route.params?.userRole || 'parent';
@@ -95,6 +101,76 @@ export function Dashboard() {
   };
 
   const navigationItems = getRoleSpecificNavigationItems();
+
+  // Fetch children for parent users
+  const fetchChildren = async () => {
+    if (userRole !== 'parent') return;
+
+    setIsLoadingChildren(true);
+    try {
+      const childrenData = await apiService.getChildren();
+      setChildren(childrenData);
+    } catch (error) {
+      console.error('Failed to fetch children:', error);
+    } finally {
+      setIsLoadingChildren(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (userRole === 'parent') {
+      fetchChildren();
+    }
+  }, [userRole]);
+
+  const handleChildPress = (child: Child) => {
+    setSelectedChild(child);
+    setIsChildDetailModalVisible(true);
+  };
+
+  const handleCreateChildSuccess = () => {
+    // Refresh children list when a new child is created
+    fetchChildren();
+    console.log(`${getPlayerChildTerminology()} account created successfully`);
+  };
+
+  const renderChildCard = (child: Child) => (
+    <TouchableOpacity
+      key={child.id}
+      style={styles.childCard}
+      onPress={() => handleChildPress(child)}
+    >
+      <View style={styles.childCardContent}>
+        <View style={styles.childInfo}>
+          <View style={styles.childAvatarContainer}>
+            <View style={styles.childAvatar}>
+              <Ionicons name="person" size={24} color="white" />
+            </View>
+            {child.auth_user_id && (
+              <View style={styles.loginBadge}>
+                <Ionicons name="checkmark-circle" size={12} color={Colors.success} />
+              </View>
+            )}
+          </View>
+          <View style={styles.childDetails}>
+            <Text style={styles.childName}>{child.name}</Text>
+            <Text style={styles.childStatus}>
+              {child.auth_user_id ? 'Can login independently' : 'Profile only'}
+            </Text>
+            <Text style={styles.childDate}>
+              Member since {new Date(child.created_at).toLocaleDateString('en-US', {
+                month: 'short',
+                year: 'numeric',
+              })}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.childActions}>
+          <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <LinearGradient colors={[Colors.background, Colors.backgroundLight]} style={styles.container}>
@@ -179,47 +255,38 @@ export function Dashboard() {
               )}
             </View>
 
-            {/* Quick Stats Placeholder */}
-            {/* <View style={styles.statsSection}>
-              <Text style={styles.sectionTitle}>Quick Overview</Text>
-              <View style={styles.statsGrid}>
-                <View style={styles.statCard}>
-                  <View style={[styles.statIcon, { backgroundColor: Colors.success }]}>
-                    <Ionicons name="checkmark-circle" size={24} color="white" />
-                  </View>
-                  <Text style={styles.statValue}>
-                    {userRole === 'coach' ? '12/15' : '7/7'}
-                  </Text>
-                  <Text style={styles.statLabel}>
-                    {userRole === 'coach' ? 'Ready Players' : 'Days Active'}
+            {/* Children Section - Only for Parents */}
+            {userRole === 'parent' && (
+              <View style={styles.childrenSection}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>My Children</Text>
+                  <Text style={styles.childrenSectionSubtitle}>
+                    {children.length === 0
+                      ? 'No children added yet'
+                      : `${children.length} ${children.length === 1 ? 'child' : 'children'}`
+                    }
                   </Text>
                 </View>
 
-                <View style={styles.statCard}>
-                  <View style={[styles.statIcon, { backgroundColor: Colors.primary }]}>
-                    <Ionicons name="heart" size={24} color="white" />
+                {isLoadingChildren ? (
+                  <View style={styles.loadingChildren}>
+                    <Text style={styles.loadingText}>Loading children...</Text>
                   </View>
-                  <Text style={styles.statValue}>
-                    {userRole === 'coach' ? '85%' : '92%'}
-                  </Text>
-                  <Text style={styles.statLabel}>
-                    {userRole === 'coach' ? 'Team Health' : 'Health Score'}
-                  </Text>
-                </View>
-
-                <View style={styles.statCard}>
-                  <View style={[styles.statIcon, { backgroundColor: Colors.warning }]}>
-                    <Ionicons name="calendar" size={24} color="white" />
+                ) : children.length === 0 ? (
+                  <View style={styles.emptyChildren}>
+                    <Ionicons name="people-outline" size={48} color={Colors.textSecondary} />
+                    <Text style={styles.emptyChildrenText}>No children yet</Text>
+                    <Text style={styles.emptyChildrenSubtext}>
+                      Add your first child to start tracking their health journey
+                    </Text>
                   </View>
-                  <Text style={styles.statValue}>
-                    {userRole === 'coach' ? '3' : '2'}
-                  </Text>
-                  <Text style={styles.statLabel}>
-                    {userRole === 'coach' ? 'Upcoming Games' : 'Appointments'}
-                  </Text>
-                </View>
+                ) : (
+                  <View style={styles.childrenList}>
+                    {children.map(renderChildCard)}
+                  </View>
+                )}
               </View>
-            </View> */}
+            )}
 
             {/* Daily Recommendation Section */}
             <View style={styles.recommendationSection}>
@@ -339,10 +406,14 @@ export function Dashboard() {
         <CreateChildModal
           isVisible={isCreatePlayerModalVisible}
           onClose={() => setIsCreatePlayerModalVisible(false)}
-          onSuccess={() => {
-            // Optionally refresh data or show success message
-            console.log(`${getPlayerChildTerminology()} account created successfully`);
-          }}
+          onSuccess={handleCreateChildSuccess}
+        />
+
+        {/* Child Detail Modal */}
+        <ChildDetailModal
+          child={selectedChild}
+          isVisible={isChildDetailModalVisible}
+          onClose={() => setIsChildDetailModalVisible(false)}
         />
       </SafeAreaView>
     </LinearGradient>
@@ -644,5 +715,100 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: 'white',
+  },
+  childrenSection: {
+    gap: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  childrenSectionSubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  loadingChildren: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  emptyChildren: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  emptyChildrenText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  emptyChildrenSubtext: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  childrenList: {
+    gap: 12,
+  },
+  childCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  childCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  childInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  childAvatarContainer: {
+    position: 'relative',
+  },
+  childAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.gray[700],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: Colors.success,
+    borderRadius: 12,
+    padding: 2,
+  },
+  childDetails: {
+    flex: 1,
+  },
+  childName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  childStatus: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  childDate: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  childActions: {
+    padding: 8,
   },
 });
