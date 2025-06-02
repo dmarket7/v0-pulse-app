@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 8,
     backgroundColor: "white",
   },
   searchInputContainer: {
@@ -222,26 +222,28 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   searchInput: {
-    flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 10,
     fontSize: 16,
     color: "#1F2937",
   },
   filterContainer: {
     backgroundColor: "white",
     paddingBottom: 16,
+    height: 32,
   },
   filterTabs: {
     flexDirection: "row",
     paddingHorizontal: 16,
+    paddingVertical: 8,
     gap: 8,
   },
   filterTab: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 4,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "#D1D5DB",
+    height: 32,
   },
   filterTabActive: {
     backgroundColor: Colors.primary,
@@ -255,7 +257,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   playerList: {
-    flex: 1,
+
   },
   playerListContent: {
     paddingHorizontal: 16,
