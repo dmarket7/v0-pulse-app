@@ -178,12 +178,7 @@ export function Dashboard() {
         {/* Header with hamburger menu */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <TouchableOpacity
-              style={styles.menuButton}
-              onPress={() => setIsMenuVisible(true)}
-            >
-              <Ionicons name="menu" size={24} color={Colors.textPrimary} />
-            </TouchableOpacity>
+
             <View>
               <Text style={styles.title}>{getDashboardTitle()}</Text>
               <View style={styles.roleContainer}>
@@ -197,6 +192,12 @@ export function Dashboard() {
                 </View>
               </View>
             </View>
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setIsMenuVisible(true)}
+            >
+              <Ionicons name="menu" size={24} color={Colors.textPrimary} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -440,6 +441,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 16,
   },
   menuButton: {

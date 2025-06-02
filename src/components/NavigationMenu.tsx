@@ -37,7 +37,7 @@ interface NavigationMenuProps {
 
 export function NavigationMenu({ isVisible, onClose, navigationItems, userRole }: NavigationMenuProps) {
   const { user, signOut } = useAuth();
-  const slideAnim = React.useRef(new Animated.Value(-MENU_WIDTH)).current;
+  const slideAnim = React.useRef(new Animated.Value(MENU_WIDTH)).current;
 
   React.useEffect(() => {
     if (isVisible) {
@@ -48,7 +48,7 @@ export function NavigationMenu({ isVisible, onClose, navigationItems, userRole }
       }).start();
     } else {
       Animated.timing(slideAnim, {
-        toValue: -MENU_WIDTH,
+        toValue: MENU_WIDTH,
         duration: 300,
         useNativeDriver: true,
       }).start();
@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   backdrop: {
     flex: 1,
@@ -212,8 +213,8 @@ const styles = StyleSheet.create({
   },
   menuContent: {
     flex: 1,
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
     overflow: 'hidden',
   },
   safeArea: {
