@@ -89,6 +89,9 @@ export interface ApiError {
 // Child account creation types
 export interface CreateChildRequest {
   name: string;
+  gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_answer';
+  date_of_birth?: string; // Date in YYYY-MM-DD format
+  track_periods?: boolean;
   email?: string;
   password?: string;
   create_auth_account: boolean;
@@ -96,6 +99,9 @@ export interface CreateChildRequest {
 
 export interface CreateChildWithAuthRequest {
   name: string;
+  gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_answer';
+  date_of_birth?: string; // Date in YYYY-MM-DD format
+  track_periods?: boolean;
   email: string;
   password: string;
 }
@@ -109,6 +115,9 @@ export interface CreateChildResponse {
 export interface Child {
   id: string;
   name: string;
+  gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_answer';
+  date_of_birth?: string;
+  track_periods?: boolean;
   email?: string;
   auth_user_id?: string;
   parent_id: string;

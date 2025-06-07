@@ -27,6 +27,9 @@ interface CreateChildModalProps {
 export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildModalProps) {
   const [formData, setFormData] = useState({
     name: '',
+    gender: '' as 'male' | 'female' | 'non_binary' | 'prefer_not_to_answer' | '',
+    date_of_birth: '',
+    track_periods: false,
     email: '',
     password: '',
     create_auth_account: false,
@@ -34,6 +37,7 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
   const validatePassword = (password: string) => {
     const requirements = [
@@ -51,6 +55,9 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
   const resetForm = () => {
     setFormData({
       name: '',
+      gender: '',
+      date_of_birth: '',
+      track_periods: false,
       email: '',
       password: '',
       create_auth_account: false,
@@ -67,6 +74,11 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
   const handleSubmit = async () => {
     if (!formData.name.trim()) {
       Alert.alert('Error', 'Please enter the child\'s name');
+      return;
+    }
+
+    if (!formData.gender) {
+      Alert.alert('Error', 'Please select the child\'s gender');
       return;
     }
 
@@ -96,6 +108,9 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
         // Use the direct endpoint for creating with auth
         result = await apiService.createChildWithAuth({
           name: formData.name.trim(),
+          gender: formData.gender,
+          date_of_birth: formData.date_of_birth || undefined,
+          track_periods: formData.track_periods,
           email: formData.email.trim(),
           password: formData.password,
         });
@@ -103,6 +118,9 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
         // Use the flexible endpoint for profile only
         result = await apiService.createChild({
           name: formData.name.trim(),
+          gender: formData.gender,
+          date_of_birth: formData.date_of_birth || undefined,
+          track_periods: formData.track_periods,
           create_auth_account: false,
         });
       }
@@ -184,6 +202,100 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
                         />
                       </View>
                     </View>
+
+                    {/* Gender */}
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.label}>Gender *</Text>
+                      <TouchableOpacity
+                        style={styles.dropdownButton}
+                        onPress={() => setShowGenderDropdown(!showGenderDropdown)}
+                      >
+                        <Ionicons name="person-outline" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
+                        <Text style={[styles.dropdownButtonText, !formData.gender && styles.placeholderText]}>
+                          {formData.gender ?
+                            formData.gender === 'female' ? 'Female' :
+                              formData.gender === 'male' ? 'Male' :
+                                formData.gender === 'non_binary' ? 'Non-binary' :
+                                  'Prefer not to answer'
+                            : 'Select gender...'
+                          }
+                        </Text>
+                        <Ionicons
+                          name={showGenderDropdown ? "chevron-up" : "chevron-down"}
+                          size={20}
+                          color={Colors.textSecondary}
+                        />
+                      </TouchableOpacity>
+
+                      {showGenderDropdown && (
+                        <View style={styles.dropdownMenu}>
+                          {[
+                            { value: 'female', label: 'Female' },
+                            { value: 'male', label: 'Male' },
+                            { value: 'non_binary', label: 'Non-binary' },
+                            { value: 'prefer_not_to_answer', label: 'Prefer not to answer' },
+                          ].map((option) => (
+                            <TouchableOpacity
+                              key={option.value}
+                              style={styles.dropdownOption}
+                              onPress={() => {
+                                setFormData({
+                                  ...formData,
+                                  gender: option.value as any,
+                                  // Reset track_periods to false if male is selected
+                                  track_periods: option.value === 'male' ? false : formData.track_periods
+                                });
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownOptionText}>{option.label}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Date of Birth */}
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.label}>Date of Birth</Text>
+                      <View style={styles.inputWrapper}>
+                        <Ionicons name="calendar-outline" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          placeholder="YYYY-MM-DD"
+                          placeholderTextColor={Colors.textSecondary}
+                          value={formData.date_of_birth}
+                          onChangeText={(text) => setFormData({ ...formData, date_of_birth: text })}
+                          keyboardType="numeric"
+                        />
+                      </View>
+                    </View>
+
+                    {/* Track Periods - Only show if gender is not male */}
+                    {formData.gender && formData.gender !== 'male' && (
+                      <View style={styles.toggleContainer}>
+                        <TouchableOpacity
+                          style={styles.toggleButton}
+                          onPress={() => setFormData({ ...formData, track_periods: !formData.track_periods })}
+                        >
+                          <View style={styles.toggleContent}>
+                            <View style={styles.toggleIcon}>
+                              <Ionicons
+                                name={formData.track_periods ? 'checkmark-circle' : 'ellipse-outline'}
+                                size={24}
+                                color={formData.track_periods ? Colors.success : Colors.textSecondary}
+                              />
+                            </View>
+                            <View style={styles.toggleText}>
+                              <Text style={styles.toggleTitle}>Should track periods in health logs?</Text>
+                              <Text style={styles.toggleDescription}>
+                                Enable period tracking for this child's health monitoring
+                              </Text>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    )}
 
                     {/* Create Login Account Toggle */}
                     <View style={styles.toggleContainer}>
@@ -509,5 +621,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.textSecondary,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 56,
+  },
+  dropdownButtonText: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.textPrimary,
+  },
+  placeholderText: {
+    color: Colors.textSecondary,
+  },
+  dropdownMenu: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    overflow: 'hidden',
+  },
+  dropdownOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  dropdownOptionText: {
+    fontSize: 16,
+    color: Colors.textPrimary,
   },
 });
