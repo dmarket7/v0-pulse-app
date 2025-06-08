@@ -134,6 +134,64 @@ export function Dashboard() {
     console.log(`${getPlayerChildTerminology()} account created successfully`);
   };
 
+  const renderDailyRecommendationSection = () => {
+    return (
+      <View style={styles.recommendationSection}>
+        <Text style={styles.sectionTitle}>Today's Recommendation</Text>
+
+        <View style={styles.recommendationCard}>
+          <View style={styles.recommendationHeader}>
+            <Text style={styles.recommendationQuestion}>Play Hard Today?</Text>
+
+            <View style={styles.recommendationAnswer}>
+              <View style={[styles.answerCircle, { backgroundColor: Colors.success }]}>
+                <Ionicons name="flash" size={24} color="white" />
+                <Text style={styles.answerText}>YES</Text>
+              </View>
+            </View>
+          </View>
+
+          <Text style={styles.recommendationDescription}>
+            {`${user?.user_metadata?.full_name} is ready for high intensity training today.`}
+          </Text>
+
+          <View style={styles.recommendationStats}>
+            <View style={styles.recommendationStatItem}>
+              <View style={[styles.statIcon, { backgroundColor: "rgba(59, 130, 246, 0.3)" }]}>
+                <Ionicons name="heart" size={16} color="white" />
+              </View>
+              <View style={styles.statInfo}>
+                <Text style={styles.statTitle}>Recovery Score</Text>
+                <Text style={styles.statSubtitle}>From Whoop</Text>
+              </View>
+              <View style={styles.statBadge}>
+                <Text style={styles.statValue}>85%</Text>
+              </View>
+            </View>
+
+            <View style={styles.recommendationStatItem}>
+              <View style={[styles.statIcon, { backgroundColor: "rgba(139, 92, 246, 0.3)" }]}>
+                <Ionicons name="trending-up" size={16} color="white" />
+              </View>
+              <View style={styles.statInfo}>
+                <Text style={styles.statTitle}>Training Load</Text>
+                <Text style={styles.statSubtitle}>Last 7 days</Text>
+              </View>
+              <View style={[styles.statBadge, { backgroundColor: "#F59E0B" }]}>
+                <Text style={styles.statValue}>Moderate</Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.seeMoreButton}>
+            <Text style={styles.seeMoreText}>See Detailed Analysis</Text>
+            <Ionicons name="arrow-forward" size={16} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
   const renderChildCard = (child: Child) => (
     <TouchableOpacity
       key={child.id}
@@ -231,7 +289,9 @@ export function Dashboard() {
                         Record health metrics and training readiness
                       </Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
+                    <View style={styles.addButton}>
+                      <Ionicons name="add" size={20} color={Colors.success} />
+                    </View>
                   </View>
                 </TouchableOpacity>
               )}
@@ -291,67 +351,8 @@ export function Dashboard() {
               </TouchableOpacity>
             )}
 
-            {/* Daily Recommendation Section */}
-            <View style={styles.recommendationSection}>
-              <Text style={styles.sectionTitle}>
-                {userRole === 'coach' ? 'Team Readiness' : 'Today\'s Recommendation'}
-              </Text>
-
-              <View style={styles.recommendationCard}>
-                <View style={styles.recommendationHeader}>
-                  <Text style={styles.recommendationQuestion}>
-                    {userRole === 'coach' ? 'Team Ready for Hard Training?' : 'Play Hard Today?'}
-                  </Text>
-
-                  <View style={styles.recommendationAnswer}>
-                    <View style={[styles.answerCircle, { backgroundColor: Colors.success }]}>
-                      <Ionicons name="flash" size={24} color="white" />
-                      <Text style={styles.answerText}>YES</Text>
-                    </View>
-                  </View>
-                </View>
-
-                <Text style={styles.recommendationDescription}>
-                  {userRole === 'coach'
-                    ? 'Your team is ready for high intensity training today.'
-                    : `${user?.user_metadata?.full_name} is ready for high intensity training today.`
-                  }
-                </Text>
-
-                <View style={styles.recommendationStats}>
-                  <View style={styles.recommendationStatItem}>
-                    <View style={[styles.statIcon, { backgroundColor: "rgba(59, 130, 246, 0.3)" }]}>
-                      <Ionicons name="heart" size={16} color="white" />
-                    </View>
-                    <View style={styles.statInfo}>
-                      <Text style={styles.statTitle}>Recovery Score</Text>
-                      <Text style={styles.statSubtitle}>From Whoop</Text>
-                    </View>
-                    <View style={styles.statBadge}>
-                      <Text style={styles.statValue}>85%</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.recommendationStatItem}>
-                    <View style={[styles.statIcon, { backgroundColor: "rgba(139, 92, 246, 0.3)" }]}>
-                      <Ionicons name="trending-up" size={16} color="white" />
-                    </View>
-                    <View style={styles.statInfo}>
-                      <Text style={styles.statTitle}>Training Load</Text>
-                      <Text style={styles.statSubtitle}>Last 7 days</Text>
-                    </View>
-                    <View style={[styles.statBadge, { backgroundColor: "#F59E0B" }]}>
-                      <Text style={styles.statValue}>Moderate</Text>
-                    </View>
-                  </View>
-                </View>
-
-                <TouchableOpacity style={styles.seeMoreButton}>
-                  <Text style={styles.seeMoreText}>See Detailed Analysis</Text>
-                  <Ionicons name="arrow-forward" size={16} color="white" />
-                </TouchableOpacity>
-              </View>
-            </View>
+            {/* Daily Recommendation Section - Only for Child Users */}
+            {userRole === 'child' && renderDailyRecommendationSection()}
 
             {/* Recent Activity Placeholder */}
             {/* <View style={styles.activitySection}>
@@ -604,6 +605,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   healthInputButton: {
+    alignSelf: 'center',
+    width: '80%',
     padding: 12,
     borderRadius: 12,
     backgroundColor: 'rgba(16, 185, 129, 0.1)',
