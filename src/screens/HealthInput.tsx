@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, TextInput, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RouteProp } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack";
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useState } from "react";
+import { Alert, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import type { RootStackParamList } from "../../App";
 import { Colors } from "../constants/colors";
 import { useAuth } from "../contexts/AuthContext";
@@ -30,7 +30,9 @@ export function HealthInput({ navigation, route }: Props) {
   const [childId, setChildId] = useState<string | null>(null);
   const [isLoadingChild, setIsLoadingChild] = useState(true);
   const [existingHealthLog, setExistingHealthLog] = useState<HealthLogRead | null>(null);
+  const [yesterdayHealthLog, setYesterdayHealthLog] = useState<HealthLogRead | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [prefillFromYesterday, setPrefillFromYesterday] = useState(false);
 
   const [onPeriodToday, setOnPeriodToday] = useState(false);
   const [hasInjury, setHasInjury] = useState(false);
@@ -50,10 +52,13 @@ export function HealthInput({ navigation, route }: Props) {
     setNotes(healthLog.notes || "");
   };
 
-  // Check for existing health log for today
+  // Check for existing health log for today and yesterday
   const checkForExistingHealthLog = async (childId: string) => {
     try {
       const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+      // Check for today's log first
       const existingLog = await apiService.getHealthLogByDate(childId, today);
 
       if (existingLog) {
@@ -64,10 +69,39 @@ export function HealthInput({ navigation, route }: Props) {
       } else {
         setIsEditing(false);
         console.log('No existing health log found for today');
+
+        // Check for yesterday's log if no today's log exists
+        try {
+          const yesterdayLog = await apiService.getHealthLogByDate(childId, yesterday);
+          if (yesterdayLog) {
+            setYesterdayHealthLog(yesterdayLog);
+            console.log('Found health log from yesterday:', yesterdayLog);
+          } else {
+            console.log('No health log found for yesterday either');
+          }
+        } catch (error) {
+          console.error('Failed to check for yesterday\'s health log:', error);
+        }
       }
     } catch (error) {
       console.error('Failed to check for existing health log:', error);
       setIsEditing(false);
+    }
+  };
+
+  // Handle prefill from yesterday's data
+  const handlePrefillFromYesterday = (enabled: boolean) => {
+    setPrefillFromYesterday(enabled);
+    if (enabled && yesterdayHealthLog) {
+      populateFormWithExistingData(yesterdayHealthLog);
+    } else {
+      // Clear the form if disabling prefill
+      setOnPeriodToday(false);
+      setHasInjury(false);
+      setInjurySeverity("");
+      setInjuryType("");
+      setInjuryLocation("");
+      setNotes("");
     }
   };
 
@@ -274,6 +308,66 @@ export function HealthInput({ navigation, route }: Props) {
 
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
+
+            {/* Status Section - Show if editing today's log */}
+            {isEditing && existingHealthLog && (
+              <View style={styles.statusSection}>
+                <View style={styles.statusHeader}>
+                  <View style={[styles.iconContainer, { backgroundColor: Colors.accent }]}>
+                    <Ionicons name="checkmark-circle" size={20} color="white" />
+                  </View>
+                  <Text style={styles.statusTitle}>Updating Today's Health Log</Text>
+                </View>
+                <Text style={styles.statusDescription}>
+                  You've already logged your health data for today. Make any changes below and click "Update Health Data" to save your changes.
+                </Text>
+              </View>
+            )}
+
+            {/* Yesterday's Data Prefill Section - Show if no today's log but yesterday's exists */}
+            {!isEditing && yesterdayHealthLog && (
+              <View style={styles.statusSection}>
+                <View style={styles.statusHeader}>
+                  <View style={[styles.iconContainer, { backgroundColor: Colors.primary }]}>
+                    <Ionicons name="time" size={20} color="white" />
+                  </View>
+                  <Text style={styles.statusTitle}>Prefill from Yesterday</Text>
+                </View>
+                <Text style={styles.statusDescription}>
+                  We found your health log from yesterday. Would you like to use the same information as a starting point?
+                </Text>
+                <View style={styles.prefillOption}>
+                  <Text style={styles.prefillLabel}>Use yesterday's data</Text>
+                  <Switch
+                    value={prefillFromYesterday}
+                    onValueChange={handlePrefillFromYesterday}
+                    trackColor={{ false: "rgba(255, 255, 255, 0.2)", true: Colors.primary }}
+                    thumbColor={prefillFromYesterday ? Colors.secondary : "rgba(255, 255, 255, 0.8)"}
+                    ios_backgroundColor="rgba(255, 255, 255, 0.2)"
+                  />
+                </View>
+                {prefillFromYesterday && (
+                  <Text style={styles.reminderText}>
+                    💡 Make sure to review and update the information below, then click "Save Health Data" to log today's data.
+                  </Text>
+                )}
+              </View>
+            )}
+
+            {/* New Entry Section - Show if no today's log and no yesterday's log */}
+            {!isEditing && !yesterdayHealthLog && (
+              <View style={styles.statusSection}>
+                <View style={styles.statusHeader}>
+                  <View style={[styles.iconContainer, { backgroundColor: Colors.success }]}>
+                    <Ionicons name="add-circle" size={20} color="white" />
+                  </View>
+                  <Text style={styles.statusTitle}>New Health Log</Text>
+                </View>
+                <Text style={styles.statusDescription}>
+                  Fill out your health information below and click "Save Health Data" to log today's data.
+                </Text>
+              </View>
+            )}
 
             {/* Period Toggle */}
             <View style={styles.section}>
@@ -604,5 +698,50 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     borderTopWidth: 1,
     borderTopColor: "rgba(255, 255, 255, 0.1)",
+  },
+  statusSection: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 16,
+    padding: 20,
+  },
+  statusHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 12,
+  },
+  statusTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: Colors.textPrimary,
+  },
+  statusDescription: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    marginBottom: 16,
+  },
+  prefillOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    marginBottom: 12,
+  },
+  prefillLabel: {
+    fontSize: 16,
+    color: Colors.textPrimary,
+    flex: 1,
+  },
+  reminderText: {
+    fontSize: 14,
+    color: Colors.accent,
+    fontStyle: "italic",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.accent,
   },
 });
