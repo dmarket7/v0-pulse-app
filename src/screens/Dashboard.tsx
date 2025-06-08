@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from '../../App';
+import { ChildDetailModal } from '../components/ChildDetailModal';
+import { CreateChildModal } from '../components/CreateChildModal';
+import { NavigationMenu } from '../components/NavigationMenu';
 import { Colors } from '../constants/colors';
 import { useAuth } from '../contexts/AuthContext';
-import { NavigationMenu } from '../components/NavigationMenu';
-import { CreateChildModal } from '../components/CreateChildModal';
-import { ChildDetailModal } from '../components/ChildDetailModal';
 import { apiService, Child } from '../services/api';
 
 type DashboardRouteProp = RouteProp<RootStackParamList, 'Dashboard'>;
@@ -215,25 +215,6 @@ export function Dashboard() {
                 }
               </Text>
 
-              {/* Create Child/Player Button - Only for Parents */}
-              {userRole === 'parent' && (
-                <TouchableOpacity
-                  style={styles.createPlayerButton}
-                  onPress={() => setIsCreatePlayerModalVisible(true)}
-                >
-                  <View style={styles.createPlayerButtonContent}>
-                    <View style={styles.createPlayerIcon}>
-                      <Ionicons name="person-add" size={20} color="white" />
-                    </View>
-                    <View style={styles.createPlayerText}>
-                      <Text style={styles.createPlayerTitle}>Create {getPlayerChildTerminology()} Account</Text>
-                      <Text style={styles.createPlayerDescription}>Add a new {getPlayerChildTerminology()} to track their health journey</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
-                  </View>
-                </TouchableOpacity>
-              )}
-
               {/* Health Input Button - Only for Child Users */}
               {userRole === 'child' && (
                 <TouchableOpacity
@@ -287,6 +268,27 @@ export function Dashboard() {
                   </View>
                 )}
               </View>
+            )}
+
+            {/* Create Child/Player Button - Only for Parents */}
+            {userRole === 'parent' && (
+              <TouchableOpacity
+                style={styles.createPlayerButton}
+                onPress={() => setIsCreatePlayerModalVisible(true)}
+              >
+                <View style={styles.createPlayerButtonContent}>
+                  <View style={styles.createPlayerIcon}>
+                    <Ionicons name="person-add" size={20} color="white" />
+                  </View>
+                  <View style={styles.createPlayerText}>
+                    <Text style={styles.createPlayerTitle}>Create {getPlayerChildTerminology()} Account</Text>
+                    <Text style={styles.createPlayerDescription}>Add a new {getPlayerChildTerminology()} to track their health journey</Text>
+                  </View>
+                  <View style={styles.addButton}>
+                    <Ionicons name="add" size={20} color={Colors.success} />
+                  </View>
+                </View>
+              </TouchableOpacity>
             )}
 
             {/* Daily Recommendation Section */}
@@ -570,6 +572,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     marginTop: 16,
+    width: '80%',
+    alignSelf: 'center',
   },
   createPlayerButtonContent: {
     flexDirection: 'row',
@@ -592,6 +596,12 @@ const styles = StyleSheet.create({
   createPlayerDescription: {
     fontSize: 12,
     color: Colors.textSecondary,
+  },
+  addButton: {
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 8,
   },
   healthInputButton: {
     padding: 12,
@@ -769,6 +779,7 @@ const styles = StyleSheet.create({
   childCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   childInfo: {
     flexDirection: 'row',
