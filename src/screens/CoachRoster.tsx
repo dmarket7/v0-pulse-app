@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { StackNavigationProp } from "@react-navigation/stack";
+import { LinearGradient } from "expo-linear-gradient";
+import { useState } from "react";
+import { FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import type { RootStackParamList } from "../../App";
 import { Colors } from "../constants/colors";
 
@@ -87,104 +88,108 @@ export function CoachRoster({ navigation }: Props) {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#1F2937" />
-          </TouchableOpacity>
-          <View>
-            <Text style={styles.headerTitle}>Team Readiness</Text>
-            <Text style={styles.headerSubtitle}>U-15 Soccer Team</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.filterButton}>
-          <Ionicons name="filter" size={20} color="#6B7280" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Search */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={16} color="#9CA3AF" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search players..."
-            value={searchTerm}
-            onChangeText={setSearchTerm}
-          />
-        </View>
-      </View>
-
-      {/* Filter Tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
-        <View style={styles.filterTabs}>
-          {["all", "optimal", "caution", "rest"].map((filter) => (
-            <TouchableOpacity
-              key={filter}
-              style={[styles.filterTab, selectedFilter === filter && styles.filterTabActive]}
-              onPress={() => setSelectedFilter(filter)}
-            >
-              <Text style={[styles.filterTabText, selectedFilter === filter && styles.filterTabTextActive]}>
-                {filter.charAt(0).toUpperCase() + filter.slice(1)}
-              </Text>
+    <LinearGradient colors={[Colors.background, Colors.backgroundLight]} style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
             </TouchableOpacity>
-          ))}
+            <View>
+              <Text style={styles.headerTitle}>Team Readiness</Text>
+              <Text style={styles.headerSubtitle}>U-15 Soccer Team</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.filterButton}>
+            <Ionicons name="filter" size={20} color={Colors.textSecondary} />
+          </TouchableOpacity>
         </View>
-      </ScrollView>
 
-      {/* Player List */}
-      <FlatList
-        data={filteredPlayers}
-        renderItem={renderPlayer}
-        keyExtractor={(item) => item.id}
-        style={styles.playerList}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.playerListContent}
-      />
-
-      {/* Summary Stats */}
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryStats}>
-          <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: Colors.success }]}>
-              {players.filter((p) => p.status === "optimal").length}
-            </Text>
-            <Text style={styles.summaryLabel}>Ready</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: Colors.warning }]}>
-              {players.filter((p) => p.status === "caution").length}
-            </Text>
-            <Text style={styles.summaryLabel}>Monitor</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: Colors.danger }]}>
-              {players.filter((p) => p.status === "rest").length}
-            </Text>
-            <Text style={styles.summaryLabel}>Rest</Text>
+        {/* Search */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons name="search" size={16} color={Colors.textSecondary} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search players..."
+              placeholderTextColor={Colors.textSecondary}
+              value={searchTerm}
+              onChangeText={setSearchTerm}
+            />
           </View>
         </View>
-      </View>
-    </SafeAreaView>
+
+        {/* Filter Tabs */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
+          <View style={styles.filterTabs}>
+            {["all", "optimal", "caution", "rest"].map((filter) => (
+              <TouchableOpacity
+                key={filter}
+                style={[styles.filterTab, selectedFilter === filter && styles.filterTabActive]}
+                onPress={() => setSelectedFilter(filter)}
+              >
+                <Text style={[styles.filterTabText, selectedFilter === filter && styles.filterTabTextActive]}>
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+
+        {/* Player List */}
+        <FlatList
+          data={filteredPlayers}
+          renderItem={renderPlayer}
+          keyExtractor={(item) => item.id}
+          style={styles.playerList}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.playerListContent}
+        />
+
+        {/* Summary Stats */}
+        <View style={styles.summaryContainer}>
+          <View style={styles.summaryStats}>
+            <View style={styles.summaryItem}>
+              <Text style={[styles.summaryValue, { color: Colors.success }]}>
+                {players.filter((p) => p.status === "optimal").length}
+              </Text>
+              <Text style={styles.summaryLabel}>Ready</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={[styles.summaryValue, { color: Colors.warning }]}>
+                {players.filter((p) => p.status === "caution").length}
+              </Text>
+              <Text style={styles.summaryLabel}>Monitor</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={[styles.summaryValue, { color: Colors.danger }]}>
+                {players.filter((p) => p.status === "rest").length}
+              </Text>
+              <Text style={styles.summaryLabel}>Rest</Text>
+            </View>
+          </View>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.gray[50],
+  },
+  safeArea: {
+    flex: 1,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "white",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: Colors.gray[700],
   },
   headerLeft: {
     flexDirection: "row",
@@ -195,55 +200,54 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: Colors.textPrimary,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.textSecondary,
   },
   filterButton: {
     padding: 8,
   },
   searchContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F3F4F6",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 48,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: 12,
   },
   searchInput: {
-    paddingVertical: 10,
     fontSize: 16,
-    color: "#1F2937",
+    color: Colors.textPrimary,
   },
   filterContainer: {
-    backgroundColor: "white",
+    height: 48,
     paddingBottom: 16,
-    height: 32,
+    marginBottom: 8,
   },
   filterTabs: {
     flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
+    paddingHorizontal: 20,
+    gap: 12,
   },
   filterTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
     height: 32,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.gray[600],
   },
   filterTabActive: {
     backgroundColor: Colors.primary,
@@ -251,31 +255,29 @@ const styles = StyleSheet.create({
   },
   filterTabText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.textSecondary,
+    fontWeight: "500",
   },
   filterTabTextActive: {
-    color: "white",
+    color: Colors.white,
   },
   playerList: {
 
   },
   playerListContent: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: 20,
     gap: 12,
+    paddingBottom: 20,
   },
   playerCard: {
-    backgroundColor: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 12,
     padding: 16,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
   },
   playerInfo: {
     flexDirection: "row",
@@ -283,27 +285,27 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   avatarContainer: {
-    width: 40,
-    height: 40,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    backgroundColor: Colors.surface,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
   },
   avatar: {
-    fontSize: 18,
+    fontSize: 20,
   },
   playerDetails: {
-    gap: 2,
+    gap: 4,
   },
   playerName: {
     fontSize: 16,
-    fontWeight: "500",
-    color: "#1F2937",
+    fontWeight: "600",
+    color: Colors.textPrimary,
   },
   playerPosition: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Colors.textSecondary,
   },
   statusContainer: {
     flexDirection: "row",
@@ -312,24 +314,25 @@ const styles = StyleSheet.create({
   },
   statusBadge: {
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 6,
     borderRadius: 12,
   },
   statusText: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "white",
   },
   statusDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   summaryContainer: {
-    backgroundColor: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    paddingVertical: 16,
+    borderTopColor: "rgba(255, 255, 255, 0.2)",
+    paddingVertical: 20,
+    paddingHorizontal: 20,
   },
   summaryStats: {
     flexDirection: "row",
@@ -337,14 +340,15 @@ const styles = StyleSheet.create({
   },
   summaryItem: {
     alignItems: "center",
+    gap: 4,
   },
   summaryValue: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 24,
+    fontWeight: "bold",
   },
   summaryLabel: {
     fontSize: 12,
-    color: "#6B7280",
-    marginTop: 2,
+    color: Colors.textSecondary,
+    fontWeight: "500",
   },
 });
