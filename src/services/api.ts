@@ -123,6 +123,11 @@ export interface Child {
   parent_id: string;
   created_at: string;
   updated_at: string;
+  current_team?: {
+    team_id: string;
+    team_name: string;
+    positions?: string[];
+  };
 }
 
 export type SportType = 'soccer' | 'basketball' | 'tennis' | 'swimming' | 'track' | 'other';

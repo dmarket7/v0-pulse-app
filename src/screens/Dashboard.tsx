@@ -231,16 +231,16 @@ export function Dashboard() {
             <View style={styles.childAvatar}>
               <Ionicons name="person" size={24} color="white" />
             </View>
-            {child.auth_user_id && (
-              <View style={styles.loginBadge}>
-                <Ionicons name="checkmark-circle" size={12} color={Colors.success} />
+            {child.current_team && (
+              <View style={styles.teamBadge}>
+                <Ionicons name="people" size={12} color={Colors.primary} />
               </View>
             )}
           </View>
           <View style={styles.childDetails}>
             <Text style={styles.childName}>{child.name}</Text>
-            <Text style={styles.childStatus}>
-              {child.auth_user_id ? 'Can login independently' : 'Profile only'}
+            <Text style={styles.childTeamStatus}>
+              {child.current_team ? child.current_team.team_name : 'No current team assigned'}
             </Text>
             <Text style={styles.childDate}>
               Member since {new Date(child.created_at).toLocaleDateString('en-US', {
@@ -898,11 +898,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  loginBadge: {
+  teamBadge: {
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: Colors.success,
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     padding: 2,
   },
@@ -914,7 +914,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  childStatus: {
+  childTeamStatus: {
     fontSize: 12,
     color: Colors.textSecondary,
   },

@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Colors } from '../constants/colors';
 import { apiService, Child, HealthLogRead } from '../services/api';
 
@@ -18,6 +17,7 @@ interface ChildDetailModalProps {
   child: Child | null;
   isVisible: boolean;
   onClose: () => void;
+  onChildUpdated?: () => void;
 }
 
 export function ChildDetailModal({ child, isVisible, onClose }: ChildDetailModalProps) {
@@ -39,9 +39,8 @@ export function ChildDetailModal({ child, isVisible, onClose }: ChildDetailModal
 
     try {
       const logs = await apiService.getHealthLogs(child.id);
-      // Sort by date, most recent first
       const sortedLogs = logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setHealthLogs(sortedLogs.slice(0, 10)); // Show last 10 logs
+      setHealthLogs(sortedLogs.slice(0, 10));
     } catch (err: any) {
       console.error('Failed to fetch health logs:', err);
       setError('Failed to load health data');
@@ -68,7 +67,7 @@ export function ChildDetailModal({ child, isVisible, onClose }: ChildDetailModal
   const getRecentActivitySummary = () => {
     if (healthLogs.length === 0) return 'No recent activity';
 
-    const recentLogs = healthLogs.slice(0, 7); // Last week
+    const recentLogs = healthLogs.slice(0, 7);
     const injuryCount = recentLogs.filter(log => log.has_injury).length;
     const periodCount = recentLogs.filter(log => log.on_period_today).length;
 
@@ -122,13 +121,13 @@ export function ChildDetailModal({ child, isVisible, onClose }: ChildDetailModal
                 <View style={styles.infoRow}>
                   <View style={styles.infoItem}>
                     <Ionicons
-                      name={child.auth_user_id ? "checkmark-circle" : "person-outline"}
+                      name={child.current_team ? "people" : "people-outline"}
                       size={20}
-                      color={child.auth_user_id ? Colors.success : Colors.textSecondary}
+                      color={child.current_team ? Colors.primary : Colors.textSecondary}
                     />
-                    <Text style={styles.infoLabel}>Account Type</Text>
+                    <Text style={styles.infoLabel}>Current Team</Text>
                     <Text style={styles.infoValue}>
-                      {child.auth_user_id ? 'Can Login' : 'Profile Only'}
+                      {child.current_team ? child.current_team.team_name : 'No team assigned'}
                     </Text>
                   </View>
                   <View style={styles.infoItem}>
@@ -138,6 +137,46 @@ export function ChildDetailModal({ child, isVisible, onClose }: ChildDetailModal
                   </View>
                 </View>
               </View>
+            </View>
+
+            {/* Team Information Section */}
+            <View style={styles.teamSection}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Team Information</Text>
+                <Text style={styles.sectionSubtitle}>Current team assignment</Text>
+              </View>
+
+              {child.current_team ? (
+                <View style={styles.currentTeamCard}>
+                  <View style={styles.currentTeamInfo}>
+                    <View style={styles.teamIcon}>
+                      <Ionicons name="people" size={24} color="white" />
+                    </View>
+                    <View style={styles.teamDetails}>
+                      <Text style={styles.teamName}>{child.current_team.team_name}</Text>
+                      {child.current_team.positions && child.current_team.positions.length > 0 && (
+                        <Text style={styles.teamPositions}>
+                          Position{child.current_team.positions.length > 1 ? 's' : ''}: {child.current_team.positions.join(', ')}
+                        </Text>
+                      )}
+                      <Text style={styles.teamNote}>
+                        Team assignments are managed by coaches
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.teamStatusBadge}>
+                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.noTeamCard}>
+                  <Ionicons name="people-outline" size={32} color={Colors.textSecondary} />
+                  <Text style={styles.noTeamText}>{child.name} is not assigned to any team</Text>
+                  <Text style={styles.noTeamSubtext}>
+                    Coaches can add players to their teams from the coach dashboard
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* Health Logs Section */}
@@ -170,7 +209,7 @@ export function ChildDetailModal({ child, isVisible, onClose }: ChildDetailModal
                 </View>
               ) : (
                 <View style={styles.logsList}>
-                  {healthLogs.map((log, index) => {
+                  {healthLogs.map((log) => {
                     const healthStatus = getHealthStatus(log);
                     return (
                       <View key={log.id} style={styles.logItem}>
@@ -263,7 +302,7 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: 'row',
-    gap: 20,
+    gap: 16,
   },
   infoItem: {
     flex: 1,
@@ -280,6 +319,69 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
     textAlign: 'center',
+  },
+  teamSection: {
+    gap: 16,
+  },
+  currentTeamCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  currentTeamInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  teamIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+  },
+  teamDetails: {
+    flex: 1,
+  },
+  teamName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+  },
+  teamPositions: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  teamNote: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  teamStatusBadge: {
+    padding: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.success,
+  },
+  noTeamCard: {
+    alignItems: 'center',
+    padding: 40,
+    gap: 12,
+  },
+  noTeamText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  noTeamSubtext: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   logsSection: {
     gap: 16,
