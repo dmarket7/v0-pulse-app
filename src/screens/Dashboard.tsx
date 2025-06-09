@@ -7,10 +7,11 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } fr
 import { RootStackParamList } from '../../App';
 import { ChildDetailModal } from '../components/ChildDetailModal';
 import { CreateChildModal } from '../components/CreateChildModal';
+import { CreateTeamModal } from '../components/CreateTeamModal';
 import { NavigationMenu } from '../components/NavigationMenu';
 import { Colors } from '../constants/colors';
 import { useAuth } from '../contexts/AuthContext';
-import { apiService, Child } from '../services/api';
+import { apiService, Child, TeamRead } from '../services/api';
 
 type DashboardRouteProp = RouteProp<RootStackParamList, 'Dashboard'>;
 type DashboardNavigationProp = StackNavigationProp<RootStackParamList, 'Dashboard'>;
@@ -25,6 +26,9 @@ export function Dashboard() {
   const [isLoadingChildren, setIsLoadingChildren] = useState(false);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [isChildDetailModalVisible, setIsChildDetailModalVisible] = useState(false);
+  const [teams, setTeams] = useState<TeamRead[]>([]);
+  const [isLoadingTeams, setIsLoadingTeams] = useState(false);
+  const [isCreateTeamModalVisible, setIsCreateTeamModalVisible] = useState(false);
 
   // Get user role from authenticated user data, fallback to route params, then default to 'parent'
   const userRole = (user?.user_metadata?.role as 'parent' | 'coach' | 'child') || route.params?.userRole || 'parent';
@@ -117,9 +121,26 @@ export function Dashboard() {
     }
   };
 
+  // Fetch teams for coach users
+  const fetchTeams = async () => {
+    if (userRole !== 'coach') return;
+
+    setIsLoadingTeams(true);
+    try {
+      const teamsData = await apiService.getMyTeams();
+      setTeams(teamsData);
+    } catch (error) {
+      console.error('Failed to fetch teams:', error);
+    } finally {
+      setIsLoadingTeams(false);
+    }
+  };
+
   React.useEffect(() => {
     if (userRole === 'parent') {
       fetchChildren();
+    } else if (userRole === 'coach') {
+      fetchTeams();
     }
   }, [userRole]);
 
@@ -132,6 +153,12 @@ export function Dashboard() {
     // Refresh children list when a new child is created
     fetchChildren();
     console.log(`${getPlayerChildTerminology()} account created successfully`);
+  };
+
+  const handleCreateTeamSuccess = () => {
+    // Refresh teams list when a new team is created
+    fetchTeams();
+    console.log('Team created successfully');
   };
 
   const renderDailyRecommendationSection = () => {
@@ -351,6 +378,70 @@ export function Dashboard() {
               </TouchableOpacity>
             )}
 
+            {/* Create Team Button - Only for Coaches without active teams */}
+            {userRole === 'coach' && !isLoadingTeams && teams.filter(team => !team.archived).length === 0 && (
+              <View style={styles.createTeamSection}>
+                <View style={styles.noTeamContainer}>
+                  <Ionicons name="people-outline" size={48} color={Colors.textSecondary} />
+                  <Text style={styles.noTeamText}>No Active Team</Text>
+                  <Text style={styles.noTeamSubtext}>
+                    Create your first team to start managing players and tracking their performance
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.createTeamButton}
+                  onPress={() => setIsCreateTeamModalVisible(true)}
+                >
+                  <View style={styles.createTeamButtonContent}>
+                    <View style={styles.createTeamIcon}>
+                      <Ionicons name="people" size={20} color="white" />
+                    </View>
+                    <View style={styles.createTeamText}>
+                      <Text style={styles.createTeamTitle}>Create Team</Text>
+                      <Text style={styles.createTeamDescription}>Start managing your players and team roster</Text>
+                    </View>
+                    <View style={styles.addButton}>
+                      <Ionicons name="add" size={20} color={Colors.success} />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Current Team Section - Only for Coaches with active teams */}
+            {userRole === 'coach' && !isLoadingTeams && teams.filter(team => !team.archived).length > 0 && (
+              <View style={styles.currentTeamSection}>
+                <Text style={styles.sectionTitle}>Current Team</Text>
+                {teams.filter(team => !team.archived).map(team => (
+                  <View key={team.id} style={styles.teamCard}>
+                    <View style={styles.teamInfo}>
+                      <View style={styles.teamIcon}>
+                        <Ionicons name="people" size={24} color="white" />
+                      </View>
+                      <View style={styles.teamDetails}>
+                        <Text style={styles.teamName}>{team.name}</Text>
+                        <Text style={styles.teamSubtext}>
+                          Created {team.created_at ? new Date(team.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          }) : 'recently'}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.manageTeamButton}
+                        onPress={() => navigateToScreen('CoachRoster')}
+                      >
+                        <Text style={styles.manageTeamText}>Manage</Text>
+                        <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+
             {/* Daily Recommendation Section - Only for Child Users */}
             {userRole === 'child' && renderDailyRecommendationSection()}
 
@@ -418,6 +509,13 @@ export function Dashboard() {
           child={selectedChild}
           isVisible={isChildDetailModalVisible}
           onClose={() => setIsChildDetailModalVisible(false)}
+        />
+
+        {/* Create Team Modal */}
+        <CreateTeamModal
+          isVisible={isCreateTeamModalVisible}
+          onClose={() => setIsCreateTeamModalVisible(false)}
+          onSuccess={handleCreateTeamSuccess}
         />
       </SafeAreaView>
     </LinearGradient>
@@ -826,5 +924,99 @@ const styles = StyleSheet.create({
   },
   childActions: {
     padding: 8,
+  },
+  createTeamSection: {
+    gap: 16,
+  },
+  noTeamContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  noTeamText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  noTeamSubtext: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  createTeamButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  createTeamButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  createTeamIcon: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  createTeamText: {
+    flex: 1,
+  },
+  createTeamTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  createTeamDescription: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  currentTeamSection: {
+    gap: 16,
+  },
+  teamCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  teamInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  teamIcon: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: Colors.gray[700],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  teamDetails: {
+    flex: 1,
+  },
+  teamName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  teamSubtext: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  manageTeamButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 8,
+  },
+  manageTeamText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textPrimary,
   },
 });

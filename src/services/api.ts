@@ -127,6 +127,70 @@ export interface Child {
 
 export type SportType = 'soccer' | 'basketball' | 'tennis' | 'swimming' | 'track' | 'other';
 
+// Team-related types
+export interface TeamCreate {
+  name: string;
+}
+
+export interface TeamRead {
+  id: string;
+  name: string;
+  created_by: string;
+  creator_name?: string;
+  archived: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface TeamResponse {
+  id: string;
+  name: string;
+  created_by: string;
+  message: string;
+}
+
+export interface TeamUpdate {
+  name?: string;
+}
+
+export interface RosterPlayer {
+  child_id: string;
+  child_name: string;
+  positions?: string[];
+}
+
+export interface TeamRoster {
+  team_id: string;
+  team_name: string;
+  players: RosterPlayer[];
+  coaches: any[];
+}
+
+export interface AddPlayerToTeam {
+  child_id: string;
+  positions?: string[];
+}
+
+export interface RemovePlayerFromTeam {
+  child_id: string;
+}
+
+export interface CoachAssignment {
+  coach_id: string;
+}
+
+export interface PlayerPosition {
+  child_id: string;
+  positions: string[];
+}
+
+export interface TeamArchiveResponse {
+  id: string;
+  name: string;
+  archived: boolean;
+  message: string;
+}
+
 class ApiService {
   private baseUrl: string;
   private authToken: string | null = null;
@@ -386,6 +450,77 @@ class ApiService {
     return this.request(`/api/v1/children/${childId}`, {
       method: 'DELETE',
     });
+  }
+
+  // Team endpoints
+  async getMyTeams(): Promise<TeamRead[]> {
+    return this.request('/api/v1/teams/');
+  }
+
+  async createTeam(data: TeamCreate): Promise<TeamResponse> {
+    return this.request('/api/v1/teams/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getTeam(teamId: string): Promise<TeamRead> {
+    return this.request(`/api/v1/teams/${teamId}`);
+  }
+
+  async updateTeam(teamId: string, data: TeamUpdate): Promise<TeamResponse> {
+    return this.request(`/api/v1/teams/${teamId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getTeamRoster(teamId: string): Promise<TeamRoster> {
+    return this.request(`/api/v1/teams/${teamId}/roster`);
+  }
+
+  async addPlayerToTeam(teamId: string, data: AddPlayerToTeam): Promise<any> {
+    return this.request(`/api/v1/teams/${teamId}/players`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async removePlayerFromTeam(teamId: string, data: RemovePlayerFromTeam): Promise<any> {
+    return this.request(`/api/v1/teams/${teamId}/players`, {
+      method: 'DELETE',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async addCoachToTeam(teamId: string, data: CoachAssignment): Promise<any> {
+    return this.request(`/api/v1/teams/${teamId}/coaches`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePlayerPositions(teamId: string, childId: string, data: PlayerPosition): Promise<any> {
+    return this.request(`/api/v1/teams/${teamId}/players/${childId}/positions`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async archiveTeam(teamId: string): Promise<TeamArchiveResponse> {
+    return this.request(`/api/v1/teams/${teamId}/archive`, {
+      method: 'POST',
+    });
+  }
+
+  async unarchiveTeam(teamId: string): Promise<TeamArchiveResponse> {
+    return this.request(`/api/v1/teams/${teamId}/unarchive`, {
+      method: 'POST',
+    });
+  }
+
+  async getArchivedTeams(): Promise<TeamRead[]> {
+    return this.request('/api/v1/teams/archived');
   }
 }
 
