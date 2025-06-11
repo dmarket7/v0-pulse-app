@@ -89,6 +89,18 @@ export function Dashboard() {
       });
     }
 
+    // Add parent-specific items
+    if (userRole === 'parent') {
+      commonItems.splice(-2, 0, {
+        id: 'team-invitations',
+        title: 'Team Invitations',
+        description: 'View and respond to team invitations',
+        icon: 'mail',
+        color: Colors.primary,
+        onPress: () => navigateToScreen('TeamInvitations'),
+      });
+    }
+
     // Add coach-specific item
     if (userRole === 'coach') {
       commonItems.splice(-2, 0, {
@@ -113,6 +125,7 @@ export function Dashboard() {
     setIsLoadingChildren(true);
     try {
       const childrenData = await apiService.getChildren();
+      console.log('childrenData', childrenData);
       setChildren(childrenData);
     } catch (error) {
       console.error('Failed to fetch children:', error);

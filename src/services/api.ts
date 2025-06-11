@@ -196,6 +196,43 @@ export interface TeamArchiveResponse {
   message: string;
 }
 
+// Invitation-related types
+export interface InvitationRequest {
+  email: string;
+  positions?: string[];
+  message?: string;
+}
+
+export interface PlayerInvitation {
+  id: string;
+  team_id: string;
+  team_name: string;
+  invited_email: string;
+  invited_by: string;
+  child_id?: string;
+  status: 'pending' | 'accepted' | 'declined' | 'expired';
+  positions?: string[];
+  message?: string;
+  created_at: string;
+  expires_at: string;
+}
+
+export interface ReceivedInvitation {
+  id: string;
+  team_name: string;
+  coach_name: string;
+  positions?: string[];
+  message?: string;
+  created_at: string;
+  expires_at: string;
+  status: 'pending' | 'accepted' | 'declined' | 'expired';
+}
+
+export interface InvitationResponse {
+  accept: boolean;
+  child_id?: string;
+}
+
 class ApiService {
   private baseUrl: string;
   private authToken: string | null = null;
@@ -526,6 +563,45 @@ class ApiService {
 
   async getArchivedTeams(): Promise<TeamRead[]> {
     return this.request('/api/v1/teams/archived');
+  }
+
+  // Invitation methods
+
+  // Coach methods for sending and managing invitations
+  async createTeamInvitation(teamId: string, data: InvitationRequest): Promise<PlayerInvitation> {
+    return this.request(`/api/v1/teams/${teamId}/invitations`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getTeamInvitations(teamId: string, includeExpired: boolean = false): Promise<PlayerInvitation[]> {
+    const params = includeExpired ? '?include_expired=true' : '';
+    return this.request(`/api/v1/teams/${teamId}/invitations${params}`);
+  }
+
+  async cancelTeamInvitation(teamId: string, invitationId: string): Promise<void> {
+    return this.request(`/api/v1/teams/${teamId}/invitations/${invitationId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Parent methods for receiving and responding to invitations
+  async getReceivedInvitations(includeExpired: boolean = false): Promise<ReceivedInvitation[]> {
+    const params = includeExpired ? '?include_expired=true' : '';
+    return this.request(`/api/v1/invitations/received${params}`);
+  }
+
+  async respondToInvitation(invitationId: string, response: InvitationResponse): Promise<any> {
+    return this.request(`/api/v1/invitations/${invitationId}/respond`, {
+      method: 'PUT',
+      body: JSON.stringify(response),
+    });
+  }
+
+  async getChildInvitations(childId: string, includeExpired: boolean = false): Promise<ReceivedInvitation[]> {
+    const params = includeExpired ? '?include_expired=true' : '';
+    return this.request(`/api/v1/children/${childId}/invitations${params}`);
   }
 }
 
