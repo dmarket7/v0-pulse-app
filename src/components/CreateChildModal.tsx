@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Colors } from '../constants/colors';
 import { ApiError, apiService } from '../services/api';
+import { formatTimezoneDisplay, getTimezoneData } from '../utils/timezone';
 
 interface CreateChildModalProps {
   isVisible: boolean;
@@ -38,6 +39,21 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+  const [timezoneInfo, setTimezoneInfo] = useState<string>('');
+
+  // Detect timezone when modal becomes visible
+  React.useEffect(() => {
+    if (isVisible && !timezoneInfo) {
+      try {
+        const tzData = getTimezoneData();
+        const tzDisplay = formatTimezoneDisplay(tzData);
+        setTimezoneInfo(tzDisplay);
+      } catch (error) {
+        console.error('Failed to detect timezone:', error);
+        setTimezoneInfo('Unable to detect');
+      }
+    }
+  }, [isVisible]);
 
   const validatePassword = (password: string) => {
     const requirements = [
@@ -102,27 +118,45 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
     setIsLoading(true);
 
     try {
+      // Get timezone data for child creation
+      const timezoneData = getTimezoneData();
+      console.log('Full timezone data:', JSON.stringify(timezoneData, null, 2));
+
+      // Use timezone identifier if available, otherwise create a fallback
+      const timezone = timezoneData.timezone ||
+        (timezoneData.offset !== undefined ? `UTC${timezoneData.offset >= 0 ? '+' : ''}${timezoneData.offset}` : undefined);
+
+      console.log('Final timezone value:', timezone);
+
       let result;
 
       if (formData.create_auth_account) {
-        // Use the direct endpoint for creating with auth
-        result = await apiService.createChildWithAuth({
+        const requestData = {
           name: formData.name.trim(),
           gender: formData.gender,
           date_of_birth: formData.date_of_birth || undefined,
           track_periods: formData.track_periods,
+          timezone,
           email: formData.email.trim(),
           password: formData.password,
-        });
+        };
+        console.log('Sending createChildWithAuth request:', JSON.stringify(requestData, null, 2));
+
+        // Use the direct endpoint for creating with auth
+        result = await apiService.createChildWithAuth(requestData);
       } else {
-        // Use the flexible endpoint for profile only
-        result = await apiService.createChild({
+        const requestData = {
           name: formData.name.trim(),
           gender: formData.gender,
           date_of_birth: formData.date_of_birth || undefined,
           track_periods: formData.track_periods,
+          timezone,
           create_auth_account: false,
-        });
+        };
+        console.log('Sending createChild request:', JSON.stringify(requestData, null, 2));
+
+        // Use the flexible endpoint for profile only
+        result = await apiService.createChild(requestData);
       }
 
       Alert.alert(
@@ -270,6 +304,16 @@ export function CreateChildModal({ isVisible, onClose, onSuccess }: CreateChildM
                         />
                       </View>
                     </View>
+
+                    {/* Timezone Info */}
+                    {timezoneInfo && (
+                      <View style={styles.timezoneInfoContainer}>
+                        <Ionicons name="globe-outline" size={16} color={Colors.textSecondary} />
+                        <Text style={styles.timezoneInfoText}>
+                          Child will be created in timezone: {timezoneInfo}
+                        </Text>
+                      </View>
+                    )}
 
                     {/* Track Periods - Only show if gender is not male */}
                     {formData.gender && formData.gender !== 'male' && (
@@ -655,5 +699,18 @@ const styles = StyleSheet.create({
   dropdownOptionText: {
     fontSize: 16,
     color: Colors.textPrimary,
+  },
+  timezoneInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.secondaryLight,
+    borderRadius: 12,
+    marginBottom: 16,
+    padding: 12,
+  },
+  timezoneInfoText: {
+    color: Colors.textSecondary,
+    fontSize: 14,
+    marginLeft: 8,
   },
 });
