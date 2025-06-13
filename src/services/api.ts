@@ -33,12 +33,20 @@ export interface ReadinessResponse {
   tips: string[];
 }
 
+export interface TimezoneData {
+  timezone?: string;
+  offset?: number;
+  locale?: string;
+  timezone_abbr?: string;
+}
+
 export interface SignUpRequest {
   email: string;
   password: string;
   full_name?: string;
   role?: 'parent' | 'coach';
   metadata?: Record<string, any>;
+  timezone_data?: TimezoneData;
 }
 
 export interface SignInRequest {

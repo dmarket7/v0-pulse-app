@@ -1,25 +1,26 @@
+import { Ionicons } from '@expo/vector-icons';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
+  View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../../App';
 import { Logo } from '../components/Logo';
 import { Colors } from '../constants/colors';
 import { useAuth } from '../contexts/AuthContext';
 import { ApiError } from '../services/api';
+import { formatTimezoneDisplay, getTimezoneData } from '../utils/timezone';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Welcome'>;
 
@@ -36,8 +37,23 @@ export function LoginScreen({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [timezoneInfo, setTimezoneInfo] = useState<string>('');
 
   const { signIn, signUp } = useAuth();
+
+  // Detect timezone when switching to signup mode
+  React.useEffect(() => {
+    if (isSignUp && !timezoneInfo) {
+      try {
+        const tzData = getTimezoneData();
+        const tzDisplay = formatTimezoneDisplay(tzData);
+        setTimezoneInfo(tzDisplay);
+      } catch (error) {
+        console.error('Failed to detect timezone:', error);
+        setTimezoneInfo('Unable to detect');
+      }
+    }
+  }, [isSignUp]);
 
   const handleSubmit = async () => {
     if (!email.trim() || !password.trim()) {
@@ -55,11 +71,16 @@ export function LoginScreen({ navigation }: Props) {
     try {
       if (isSignUp) {
         setLoadingMessage('Creating your account...');
+
+        // Get timezone data for signup
+        const timezoneData = getTimezoneData();
+
         await signUp({
           email: email.trim(),
           password,
           full_name: fullName.trim(),
           role,
+          timezone_data: timezoneData,
         });
         // Navigation will be handled by the auth state change
         // The signUp function now automatically signs in the user
@@ -191,6 +212,16 @@ export function LoginScreen({ navigation }: Props) {
                       </TouchableOpacity>
                     </View>
                   </View>
+
+                  {/* Timezone Info */}
+                  {timezoneInfo && (
+                    <View style={styles.timezoneInfo}>
+                      <Ionicons name="globe-outline" size={16} color={Colors.textSecondary} />
+                      <Text style={styles.timezoneText}>
+                        Timezone: {timezoneInfo}
+                      </Text>
+                    </View>
+                  )}
                 </>
               )}
 
@@ -467,5 +498,18 @@ const styles = StyleSheet.create({
   },
   roleButtonTextActive: {
     color: Colors.white,
+  },
+  timezoneInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.secondaryLight,
+    borderRadius: 12,
+    marginBottom: 16,
+    padding: 12,
+  },
+  timezoneText: {
+    color: Colors.textSecondary,
+    fontSize: 14,
+    marginLeft: 8,
   },
 });
