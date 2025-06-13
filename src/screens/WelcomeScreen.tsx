@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  Animated,
-  Dimensions,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import type { StackNavigationProp } from "@react-navigation/stack";
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import type { RootStackParamList } from "../../App";
 import { Logo } from "../components/Logo";
 import { Colors } from "../constants/colors";
@@ -324,6 +324,19 @@ export function WelcomeScreen({ navigation }: Props) {
               <View style={styles.publicFeaturesGrid}>
                 <TouchableOpacity
                   style={styles.publicFeatureCard}
+                  onPress={() => navigation.navigate("ReadinessCheck")}
+                >
+                  <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
+                  <View style={styles.publicFeatureContent}>
+                    <Text style={styles.publicFeatureTitle}>Readiness Check</Text>
+                    <Text style={styles.publicFeatureDescription}>
+                      Assess your training readiness
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.publicFeatureCard}
                   onPress={() => navigation.navigate("HealthTips")}
                 >
                   <Ionicons name="heart" size={24} color={Colors.primary} />
@@ -344,19 +357,6 @@ export function WelcomeScreen({ navigation }: Props) {
                     <Text style={styles.publicFeatureTitle}>Training Guidelines</Text>
                     <Text style={styles.publicFeatureDescription}>
                       Age-appropriate training plans
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.publicFeatureCard}
-                  onPress={() => navigation.navigate("ReadinessCheck")}
-                >
-                  <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
-                  <View style={styles.publicFeatureContent}>
-                    <Text style={styles.publicFeatureTitle}>Readiness Check</Text>
-                    <Text style={styles.publicFeatureDescription}>
-                      Assess your training readiness
                     </Text>
                   </View>
                 </TouchableOpacity>

@@ -20,11 +20,9 @@ export interface TrainingGuideline {
 }
 
 export interface ReadinessFactors {
-  sleep_hours: number;
-  stress_level: number;
-  muscle_soreness: number;
-  energy_level: number;
-  hydration_level: number;
+  recovery_score: number;
+  strain_score: number;
+  sleep_performance: number;
 }
 
 export interface ReadinessResponse {

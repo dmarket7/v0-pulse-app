@@ -70,13 +70,11 @@ const guidelines = await apiService.getTrainingGuidelines(sport?, ageGroup?);
 
 **Features**:
 
-- Interactive sliders for 5 factors:
-  - Sleep hours (4-12h)
-  - Stress level (1-5)
-  - Muscle soreness (1-5)
-  - Energy level (1-5)
-  - Hydration level (1-5)
-- Real-time readiness assessment
+- Interactive sliders for 3 WHOOP-based factors:
+  - Recovery Score (0-100%)
+  - Strain Score (0-21 scale)
+  - Sleep Performance (0-100%)
+- Real-time readiness assessment based on WHOOP methodology
 - Color-coded results (green/yellow/red)
 - Personalized recommendations and tips
 
@@ -84,11 +82,9 @@ const guidelines = await apiService.getTrainingGuidelines(sport?, ageGroup?);
 
 ```typescript
 const result = await apiService.checkReadiness({
-  sleep_hours: 8,
-  stress_level: 3,
-  muscle_soreness: 2,
-  energy_level: 4,
-  hydration_level: 4,
+  recovery_score: 50,
+  strain_score: 10,
+  sleep_performance: 80,
 });
 ```
 
@@ -171,7 +167,7 @@ curl http://127.0.0.1:8000/training-guidelines
 # Readiness Check
 curl -X POST http://127.0.0.1:8000/readiness-check \
   -H "Content-Type: application/json" \
-  -d '{"sleep_hours": 8, "stress_level": 3, "muscle_soreness": 2, "energy_level": 4, "hydration_level": 4}'
+  -d '{"recovery_score": 50, "strain_score": 10, "sleep_performance": 80}'
 ```
 
 ### Using in Components

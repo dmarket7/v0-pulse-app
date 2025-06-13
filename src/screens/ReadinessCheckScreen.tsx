@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import type { StackNavigationProp } from '@react-navigation/stack';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRef, useState } from 'react';
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import type { RootStackParamList } from '../../App';
-import { apiService, ReadinessFactors, ReadinessResponse } from '../services/api';
 import { Colors } from '../constants/colors';
+import { apiService, ReadinessFactors, ReadinessResponse } from '../services/api';
 
 type ReadinessCheckScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Welcome'>;
 
@@ -23,12 +23,11 @@ interface Props {
 }
 
 export function ReadinessCheckScreen({ navigation }: Props) {
+  const scrollViewRef = useRef<ScrollView>(null);
   const [factors, setFactors] = useState<ReadinessFactors>({
-    sleep_hours: 8,
-    stress_level: 3,
-    muscle_soreness: 3,
-    energy_level: 3,
-    hydration_level: 3,
+    recovery_score: 50,
+    strain_score: 10,
+    sleep_performance: 80,
   });
   const [result, setResult] = useState<ReadinessResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,6 +37,9 @@ export function ReadinessCheckScreen({ navigation }: Props) {
       setLoading(true);
       const response = await apiService.checkReadiness(factors);
       setResult(response);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
     } catch (error) {
       console.error('Error checking readiness:', error);
       Alert.alert('Error', 'Failed to check readiness. Please try again.');
@@ -76,16 +78,20 @@ export function ReadinessCheckScreen({ navigation }: Props) {
     label: string,
     value: number,
     onValueChange: (value: number) => void,
-    min: number = 1,
-    max: number = 5,
+    min: number = 0,
+    max: number = 100,
     step: number = 1,
-    unit: string = ''
+    unit: string = '',
+    description?: string
   ) => (
     <View style={styles.sliderContainer}>
       <View style={styles.sliderHeader}>
         <Text style={styles.sliderLabel}>{label}</Text>
         <Text style={styles.sliderValue}>{value}{unit}</Text>
       </View>
+      {description && (
+        <Text style={styles.sliderDescription}>{description}</Text>
+      )}
       <Slider
         style={styles.slider}
         minimumValue={min}
@@ -117,60 +123,51 @@ export function ReadinessCheckScreen({ navigation }: Props) {
           <View style={styles.placeholder} />
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.introSection}>
             <Ionicons name="fitness" size={48} color={Colors.primary} />
             <Text style={styles.introTitle}>How are you feeling today?</Text>
             <Text style={styles.introText}>
-              Answer these questions to get a personalized readiness assessment for training.
+              Based on WHOOP data metrics: recovery, strain, and sleep performance to get your training readiness.
             </Text>
           </View>
 
           <View style={styles.factorsSection}>
             {renderSlider(
-              'Sleep Hours',
-              factors.sleep_hours,
-              (value) => setFactors({ ...factors, sleep_hours: value }),
-              4,
-              12,
-              0.5,
-              'h'
+              'Recovery Score',
+              factors.recovery_score,
+              (value) => setFactors({ ...factors, recovery_score: value }),
+              0,
+              100,
+              1,
+              '%',
+              'How well recovered you feel (0-100%)'
             )}
 
             {renderSlider(
-              'Stress Level',
-              factors.stress_level,
-              (value) => setFactors({ ...factors, stress_level: value }),
+              'Strain Score',
+              Math.round(factors.strain_score),
+              (value) => setFactors({ ...factors, strain_score: Math.round(value) }),
+              0,
+              21,
               1,
-              5,
-              1
+              '',
+              'Your recent training strain (0-21 scale)'
             )}
 
             {renderSlider(
-              'Muscle Soreness',
-              factors.muscle_soreness,
-              (value) => setFactors({ ...factors, muscle_soreness: value }),
+              'Sleep Performance',
+              factors.sleep_performance,
+              (value) => setFactors({ ...factors, sleep_performance: value }),
+              0,
+              100,
               1,
-              5,
-              1
-            )}
-
-            {renderSlider(
-              'Energy Level',
-              factors.energy_level,
-              (value) => setFactors({ ...factors, energy_level: value }),
-              1,
-              5,
-              1
-            )}
-
-            {renderSlider(
-              'Hydration Level',
-              factors.hydration_level,
-              (value) => setFactors({ ...factors, hydration_level: value }),
-              1,
-              5,
-              1
+              '%',
+              'Quality of your sleep last night (0-100%)'
             )}
           </View>
 
@@ -383,5 +380,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     lineHeight: 20,
+  },
+  sliderDescription: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginBottom: 8,
   },
 });
